@@ -84,6 +84,18 @@ Não são telas estáticas — a lógica roda no cliente e é a mesma que o back
 - **GSAP** (`src/lib/anima.ts`): entrada em cascata a cada troca de tela, contadores animados nos
   indicadores, resposta tátil no teclado do ponto. Tudo desligado sob `prefers-reduced-motion`.
 
+## Próxima etapa: da demo para a v1
+
+[`docs/MELHORIAS.md`](docs/MELHORIAS.md) levanta o que sistemas de gestão para padaria entregam
+hoje e que ainda não cobrimos — emissão fiscal, ponto conforme a legislação, balança com código de
+peso variável, entrada de estoque por XML da NF-e, TEF e PIX, perdas de balcão, KDS, auditoria,
+CMV, fidelidade e delivery — priorizado por impacto e esforço.
+
+[`src/futuro/`](src/futuro) traz o esqueleto correspondente: contratos tipados e portas, sem
+implementação e sem ligação com a interface. Ficam em `src/` porque assim o compilador confere;
+como nada é importado pela aplicação, o bundle não cresce. A exceção é `balanca.ts`, cujo parser de
+EAN-13 já está pronto e coberto por testes (`npm test`).
+
 ## O que **não** existe aqui
 
 Fora de escopo nesta etapa, por decisão: backend, banco de dados, autenticação real, integração com
