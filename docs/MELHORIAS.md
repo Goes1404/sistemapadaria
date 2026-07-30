@@ -29,7 +29,7 @@ o trabalho é preencher, não desenhar do zero.
 | 8 | Auditoria e permissões granulares | Alto | Baixo | v1 |
 | 9 | CMV, margem e curva ABC | Alto | Médio | v2 |
 | 10 | Fidelidade, clube do pão e CRM | Médio-alto | Médio | v2 |
-| 11 | Delivery (iFood/Rappi) e cardápio digital | Médio-alto | Alto | v2 |
+| ~~11~~ | ~~Delivery (iFood/Rappi) e cardápio digital~~ | — | — | **descartado pelo cliente** |
 | 12 | Previsão de demanda | Médio | Alto | v3 |
 | 13 | Compras: sugestão e cotação | Médio | Médio | v3 |
 | ~~14~~ | ~~Multi-loja~~ | — | — | **descartado pelo cliente** |
@@ -206,15 +206,21 @@ Casa bem com o módulo de WhatsApp que já existe: o canal de comunicação já 
 
 Esqueleto: [`src/futuro/fidelidade.ts`](../src/futuro/fidelidade.ts)
 
-### 11. Delivery e cardápio digital
+### 11. Delivery e cardápio digital — **descartado**
 
-- Integração com iFood e Rappi, para os pedidos caírem no mesmo painel das encomendas de WhatsApp
-  em vez de num tablet separado por aplicativo.
-- Cardápio digital com QR Code na mesa, para a cafeteria.
-- Loja própria de encomendas na web, que evita a comissão dos marketplaces para o cliente fiel.
+Decisão do cliente: a Bela Vista não trabalha com delivery. Fica registrado que **não** haverá
+integração com iFood, Rappi ou qualquer marketplace, nem loja própria de entrega.
 
-Esforço alto por causa das homologações de cada plataforma. Vale quando o volume de delivery
-justificar.
+Consequências, todas positivas para o escopo:
+
+- O canal de venda digital continua sendo só o **WhatsApp**, que já está no MVP.
+- Não há comissão de marketplace a modelar, o que simplifica o financeiro: o valor da venda é o
+  valor que entra.
+- O KDS fica mais simples — só atende balcão e encomenda de WhatsApp, sem status de despacho
+  nem entregador.
+
+Se um dia a decisão mudar, o ponto de entrada natural é o painel de encomendas que já existe:
+pedido de marketplace cairia na mesma fila, com um campo de origem a mais.
 
 ### 12. BI e metas
 
@@ -257,7 +263,8 @@ reescrever toda consulta do sistema. É o custo aceito em troca de um modelo mai
 ## O que eu não recomendo agora
 
 - **App próprio para o cliente final.** Custo alto de desenvolvimento e de aquisição de usuário.
-  O WhatsApp já é o app que o cliente da padaria tem e usa.
+  O WhatsApp já é o app que o cliente da padaria tem e usa — e, sem delivery, não há nem o caso
+  de uso de acompanhar entrega.
 - **Autoatendimento / totem.** Faz sentido em fast-food, raramente em padaria de bairro, onde o
   atendimento no balcão é parte do serviço.
 - **Reconhecimento de produto por imagem no caixa.** Tecnologia interessante, custo e taxa de erro

@@ -79,40 +79,16 @@ export interface Analytics {
 // Canais de venda
 // ---------------------------------------------------------------------------
 
-export type CanalVenda = 'PDV' | 'WHATSAPP' | 'IFOOD' | 'RAPPI' | 'LOJA_PROPRIA' | 'ASSINATURA'
-
-export interface PedidoCanal {
-  id: string
-  canal: CanalVenda
-  /** Identificador do pedido no sistema do parceiro. */
-  idExterno: string
-  cliente: { nome: string; telefone?: string; endereco?: string }
-  itens: { produtoId?: string; descricaoExterna: string; quantidade: number; valor: number }[]
-  subtotal: number
-  taxaEntrega: number
-  /** Comissão do marketplace — precisa aparecer no resultado, não só o bruto. */
-  comissao: number
-  liquido: number
-  status: 'NOVO' | 'ACEITO' | 'EM_PREPARO' | 'PRONTO' | 'DESPACHADO' | 'ENTREGUE' | 'CANCELADO'
-  recebidoEm: string
-}
-
 /**
- * Porta dos marketplaces.
+ * Canais pelos quais a venda entra.
  *
- * O objetivo é os pedidos caírem no MESMO painel das encomendas de WhatsApp,
- * em vez de um tablet por aplicativo no balcão.
+ * Marketplaces (iFood, Rappi) e entrega própria foram DESCARTADOS por decisão
+ * do cliente — a Bela Vista não trabalha com delivery. Ver docs/MELHORIAS.md
+ * § 11. Consequência prática: não há comissão a modelar, então o valor da
+ * venda é o valor que entra, e o KDS não precisa de status de despacho.
  *
- * O de-para de produto é o mesmo problema do XML de fornecedor: o código do
- * item no iFood não é o nosso.
+ * Se a decisão mudar, o ponto de entrada natural é o painel de encomendas que
+ * já existe: o pedido do marketplace cai na mesma fila, com uma origem a mais
+ * e um campo de comissão em `IndicadoresPeriodo`.
  */
-export interface IntegracaoCanal {
-  canal: CanalVenda
-  pedidosNovos(): Promise<PedidoCanal[]>
-  aceitar(idExterno: string, minutosPreparo: number): Promise<void>
-  recusar(idExterno: string, motivo: string): Promise<void>
-  atualizarStatus(idExterno: string, status: PedidoCanal['status']): Promise<void>
-  /** Pausar o canal quando faltar produto ou a cozinha estiver saturada. */
-  pausarCanal(motivo: string, minutos: number): Promise<void>
-  sincronizarCardapio(): Promise<{ enviados: number; erros: string[] }>
-}
+export type CanalVenda = 'PDV' | 'WHATSAPP' | 'ASSINATURA'

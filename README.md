@@ -119,7 +119,11 @@ O levantamento em [`docs/MELHORIAS.md`](docs/MELHORIAS.md) virou funcionalidade 
 [`docs/MELHORIAS.md`](docs/MELHORIAS.md) levanta o que sistemas de gestão para padaria entregam
 hoje e que ainda não cobrimos — emissão fiscal, ponto conforme a legislação, balança com código de
 peso variável, entrada de estoque por XML da NF-e, TEF e PIX, perdas de balcão, KDS, auditoria,
-CMV, fidelidade e delivery — priorizado por impacto e esforço.
+CMV e fidelidade — priorizado por impacto e esforço.
+
+Duas coisas ficaram **descartadas por decisão do cliente** e estão registradas como tal:
+multi-loja (a Bela Vista opera uma unidade só) e delivery (não haverá iFood, Rappi nem entrega
+própria — o canal digital é só o WhatsApp).
 
 [`src/futuro/`](src/futuro) traz o esqueleto correspondente: contratos tipados e portas, sem
 implementação e sem ligação com a interface. Ficam em `src/` porque assim o compilador confere;

@@ -85,7 +85,8 @@ export interface PlanoAssinatura {
   /** Para frequência semanal/quinzenal: em que dias entrega. */
   diasSemana?: number[]
   valorMensal: number
-  entrega: 'RETIRADA' | 'ENTREGA'
+  /** Só retirada no balcão: a padaria não faz entrega. */
+  entrega: 'RETIRADA'
 }
 
 export interface Assinatura {

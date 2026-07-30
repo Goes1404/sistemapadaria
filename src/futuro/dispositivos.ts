@@ -56,6 +56,7 @@ export interface ServicoImpressao {
 // KDS — Kitchen Display System
 // ---------------------------------------------------------------------------
 
+/** Sem delivery, o ciclo termina na entrega ao cliente no balcão. */
 export type StatusPreparo = 'AGUARDANDO' | 'EM_PREPARO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO'
 
 /**
@@ -68,7 +69,7 @@ export interface PedidoCozinha {
   id: string
   /** Número curto que o cliente ouve ser chamado. */
   senha: string
-  origem: 'PDV' | 'WHATSAPP' | 'DELIVERY' | 'MESA'
+  origem: 'PDV' | 'WHATSAPP' | 'MESA'
   itens: {
     produtoId: string
     nome: string
