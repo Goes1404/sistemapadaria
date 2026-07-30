@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '@/store'
 import { brl, horaBR } from '@/lib/format'
-import { Badge, Card, PageHeader, Vazio } from '@/components/ui'
+import { Badge, Card, Logo, PageHeader, Vazio } from '@/components/ui'
 import type { StatusPedido } from '@/types'
 
 const rotuloStatus: Record<StatusPedido, { texto: string; tom: 'ok' | 'alerta' | 'erro' | 'neutro' }> = {
@@ -138,7 +138,7 @@ function Conversa() {
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="mx-auto w-full max-w-sm rounded-2xl bg-[#0b141a] p-3 shadow-lg">
         <div className="mb-3 flex items-center gap-2.5 px-1 py-1.5">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-bela-600 text-sm">🥖</span>
+          <Logo tamanho={32} />
           <div>
             <p className="text-sm font-semibold text-white">Pães e Doces Bela Vista</p>
             <p className="text-[11px] text-emerald-400">online</p>

@@ -1,7 +1,9 @@
-# Sistema de Gestão para Padarias — protótipo de validação
+# Pães e Doces Bela Vista — Sistema de Gestão
 
 Protótipo navegável do MVP, feito para **validar o produto com o cliente antes de escrever backend**.
 Tudo roda no navegador com dados fictícios em memória — não há servidor, banco nem integração real.
+
+**Demo:** https://sistemapadaria-theta.vercel.app
 
 > Ao recarregar a página, os dados voltam ao estado inicial. Isso é intencional: permite refazer a
 > demonstração quantas vezes for preciso, sempre do mesmo ponto de partida.
@@ -13,8 +15,8 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-Build de produção: `npm run build` (saída em `dist/`, pronta para Vercel/Netlify — o `vercel.json`
-já trata o roteamento SPA).
+Build de produção: `npm run build` (saída em `dist/`). O `vercel.json` trata o roteamento SPA —
+sem ele, abrir `/pdv` direto ou recarregar a página daria 404.
 
 ## Telas
 
@@ -22,7 +24,7 @@ já trata o roteamento SPA).
 |---|---|---|
 | `/` | Login | Gerente — qualquer e-mail/senha entra |
 | `/app` | Dashboard de alertas | Gerente |
-| `/app/estoque` | Farol de validade, lotes, insumos, movimentações | Estoquista / gerente |
+| `/app/estoque` | Farol de validade, lotes, insumos, movimentações, perdas | Estoquista / gerente |
 | `/app/producao` | Ficha técnica, registro de fornada, pauta do dia | Padeiro |
 | `/app/whatsapp` | Painel de encomendas + simulação da conversa | Atendente |
 | `/app/rh` | Equipe, registros e inconsistências de ponto | Gerente |
@@ -34,25 +36,28 @@ PINs da demo: `1234` Marcos · `2345` Ana · `3456` Rafael · `4567` Juliana · 
 
 ## Roteiro sugerido de demonstração
 
-1. **Dashboard** — abrir e ler os três alertas críticos: lotes vencendo, ponto inconsistente,
-   encomendas pendentes. É a tela que justifica o sistema em 10 segundos.
-2. **Estoque** → aba Lotes. Mostrar que Farinha tem três lotes independentes com validades
-   diferentes. Mexer no campo "alerta amarelo com N dias" e ver o farol reclassificar ao vivo.
-3. **Produção** — selecionar "Pão Francês", quantidade 100. Antes de confirmar, apontar o bloco
+1. **Dashboard** — ler os três alertas críticos: lotes vencendo, ponto inconsistente, encomendas
+   pendentes. É a tela que justifica o sistema em 10 segundos.
+2. **Estoque** → aba Lotes. Farinha tem três lotes independentes com validades diferentes. Mexer
+   no campo "alerta amarelo com N dias" e ver o farol reclassificar ao vivo.
+3. **Estoque** → aba **Perdas**. Quanto já foi descartado, quanto está vencido na prateleira,
+   quanto está em risco, e o ranking de onde o dinheiro está parado. É o número que fecha a venda.
+4. **Produção** — selecionar "Pão Francês", quantidade 100. Antes de confirmar, apontar o bloco
    *Consumo previsto*: o sistema escolheu o lote **FT-2417**, que vence primeiro, e não o mais
    antigo cadastrado. Confirmar e mostrar as baixas aplicadas.
-4. Aumentar a quantidade para 5000 → o botão bloqueia e avisa qual insumo falta. **Nada é baixado
-   parcialmente**: ou a fornada inteira acontece, ou nenhuma.
-5. **Encomendas** → aceitar um pedido e mostrar que ele sai da fila. Na aba *Como o cliente vê*,
-   percorrer o fluxo de menus numéricos do WhatsApp.
-6. **PDV** — bipar/tocar produtos, adicionar "Pão Francês (kg)" para mostrar a entrada por peso,
-   e no pagamento dividir entre Dinheiro e PIX para ver o cálculo do troco.
-7. **Terminal de ponto** — digitar `2345`. O sistema decide sozinho se é entrada, pausa ou saída
+5. Aumentar para 5000 → o botão bloqueia e avisa qual insumo falta. **Nada é baixado parcialmente**:
+   ou a fornada inteira acontece, ou nenhuma.
+6. **Encomendas** → aceitar um pedido e vê-lo sair da fila. Na aba *Como o cliente vê*, percorrer
+   o fluxo de menus numéricos do WhatsApp.
+7. **PDV** — tocar produtos, adicionar "Pão Francês (kg)" para mostrar a entrada por peso, e no
+   pagamento dividir entre Dinheiro e PIX para ver o troco. Depois **Fechar caixa** e conferir a
+   gaveta: o sistema aponta sobra ou falta.
+8. **Terminal de ponto** — digitar `2345`. O sistema decide sozinho se é entrada, pausa ou saída
    com base no último registro.
-8. **Equipe** — resolver a inconsistência do Marcos (turno aberto há mais de 14h).
-9. **Financeiro** — fechar mostrando o consolidado do dia, já com a venda feita no passo 6.
+9. **Equipe** — resolver a inconsistência do Marcos (turno aberto há mais de 14h).
+10. **Financeiro** — fechar mostrando o consolidado do dia, já com a venda feita no passo 7.
 
-## Regras de negócio que o protótipo já implementa de verdade
+## Regras de negócio que o protótipo implementa de verdade
 
 Não são telas estáticas — a lógica roda no cliente e é a mesma que o backend vai reproduzir:
 
@@ -66,7 +71,18 @@ Não são telas estáticas — a lógica roda no cliente e é a mesma que o back
   configurável.
 - **Máquina de estados do ponto** — o próximo registro é deduzido do último; não dá para bater
   duas entradas seguidas nem sair sem ter entrado.
+- **Conferência de gaveta** — separa dinheiro físico de cartão/PIX e apura a diferença do turno.
 - **Encomenda nasce pendente** — só vira confirmada após aceite humano no painel.
+
+## Identidade e interface
+
+- Paleta tirada da logo: **âmbar** (`bela-*`) para ação e destaque, **verde-mata** (`mata-*`) como
+  base institucional e de texto.
+- **Vidro líquido** (`.vidro` em `src/index.css`): base translúcida com blur e saturate, brilho
+  especular acompanhando o cursor, e borda interna clara no topo para dar espessura. O fundo da
+  página é uma malha de gradientes da marca — sem cor atrás, vidro não parece vidro.
+- **GSAP** (`src/lib/anima.ts`): entrada em cascata a cada troca de tela, contadores animados nos
+  indicadores, resposta tátil no teclado do ponto. Tudo desligado sob `prefers-reduced-motion`.
 
 ## O que **não** existe aqui
 
@@ -76,4 +92,4 @@ fluxo e telas — a fundação técnica vem depois, com o backlog já aprovado.
 
 ## Stack
 
-React 18 · TypeScript · Vite · Tailwind CSS · React Router. Sem dependência de UI externa.
+React 18 · TypeScript · Vite · Tailwind CSS · React Router · GSAP. Sem biblioteca de UI externa.

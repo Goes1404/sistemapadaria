@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '@/store'
 import { brl, num } from '@/lib/format'
+import { pulsar } from '@/lib/anima'
+import { Logo } from '@/components/ui'
 import type { FormaPagamento, ItemVenda, Pagamento } from '@/types'
 
 const formas: { id: FormaPagamento; rotulo: string }[] = [
@@ -23,6 +25,10 @@ export default function PDV() {
   const [comprovante, setComprovante] = useState<{ total: number; pagamentos: Pagamento[]; troco: number } | null>(null)
 
   const total = itens.reduce((s, i) => s + i.quantidade * i.precoUnitario, 0)
+  const totalRef = useRef<HTMLSpanElement>(null)
+
+  // O total pulsa a cada mudança do carrinho — confirma a ação sem tirar o olho da tela.
+  useEffect(() => { if (itens.length) pulsar(totalRef.current) }, [total, itens.length])
 
   const filtrados = produtos.filter(
     (p) => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.codigoBarras?.includes(busca),
@@ -57,11 +63,13 @@ export default function PDV() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-mata-900/5 lg:flex-row">
+    <div className="flex h-screen flex-col lg:flex-row">
       {/* Catálogo */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-3 border-b border-white/50 bg-white px-5 py-3.5">
-          <button onClick={() => navigate('/app')} className="text-sm text-mata-900/35 hover:text-mata-700">←</button>
+        <header className="flex items-center gap-3 border-b border-mata-900/10 bg-white/55 px-5 py-3.5 backdrop-blur-xl">
+          <button onClick={() => navigate('/app')}
+                  className="grid h-8 w-8 place-items-center rounded-lg text-mata-900/40 transition-colors hover:bg-white/70 hover:text-mata-800">←</button>
+          <Logo tamanho={30} />
           <div className="flex-1">
             <p className="text-sm font-bold text-mata-900">Frente de caixa</p>
             <p className="text-xs text-mata-900/50">{caixa.operador} · troco inicial {brl(caixa.trocoInicial)}</p>
@@ -74,7 +82,7 @@ export default function PDV() {
           </button>
         </header>
 
-        <div className="border-b border-white/50 bg-white px-5 py-3">
+        <div className="border-b border-mata-900/10 bg-white/40 px-5 py-3 backdrop-blur-xl">
           <input
             autoFocus
             className="input"
@@ -90,7 +98,7 @@ export default function PDV() {
         <div className="grid flex-1 auto-rows-min grid-cols-2 gap-3 overflow-y-auto p-5 sm:grid-cols-3 xl:grid-cols-4">
           {filtrados.map((p) => (
             <button key={p.id} onClick={() => adicionar(p.id)}
-              className="card flex flex-col justify-between p-4 text-left transition-shadow hover:shadow-md active:scale-[0.98]">
+              className="vidro vidro-interativo flex flex-col justify-between p-4 text-left transition-all hover:-translate-y-0.5 active:scale-[0.97]">
               <span className="text-sm font-semibold leading-snug text-mata-800">{p.nome}</span>
               <span className="mt-3 text-lg font-bold tabular-nums text-bela-700">
                 {brl(p.preco)}{p.porPeso && <span className="text-xs font-normal text-mata-900/35">/kg</span>}
@@ -104,8 +112,8 @@ export default function PDV() {
       </div>
 
       {/* Carrinho */}
-      <aside className="flex w-full shrink-0 flex-col border-t border-white/50 bg-white lg:w-96 lg:border-l lg:border-t-0">
-        <header className="border-b border-white/50 px-5 py-3.5">
+      <aside className="flex w-full shrink-0 flex-col border-t border-mata-900/10 bg-white/60 backdrop-blur-2xl lg:w-96 lg:border-l lg:border-t-0">
+        <header className="border-b border-mata-900/10 px-5 py-3.5">
           <p className="text-sm font-bold text-mata-900">Venda atual</p>
           <p className="text-xs text-mata-900/50">{itens.length} {itens.length === 1 ? 'item' : 'itens'}</p>
         </header>
@@ -116,7 +124,7 @@ export default function PDV() {
               Toque nos produtos ou bipe o código de barras.
             </p>
           ) : (
-            <ul className="divide-y divide-white/40">
+            <ul className="divide-y divide-mata-900/8">
               {itens.map((i) => (
                 <li key={i.produtoId} className="flex items-center gap-3 px-5 py-3">
                   <div className="min-w-0 flex-1">
@@ -140,10 +148,10 @@ export default function PDV() {
           )}
         </div>
 
-        <footer className="border-t border-white/50 p-5">
+        <footer className="border-t border-mata-900/10 p-5">
           <div className="mb-4 flex items-baseline justify-between">
             <span className="text-sm font-semibold text-mata-900/60">Total</span>
-            <span className="text-3xl font-bold tabular-nums text-mata-900">{brl(total)}</span>
+            <span ref={totalRef} className="text-3xl font-extrabold tabular-nums text-mata-900">{brl(total)}</span>
           </div>
           <div className="flex gap-2">
             <button className="btn-ghost flex-1" disabled={itens.length === 0} onClick={() => setItens([])}>
@@ -500,7 +508,7 @@ function AberturaCaixa({ onAbrir, onVoltar }: {
   const [operador, setOperador] = useState('Ana Beatriz Lopes')
   const [troco, setTroco] = useState('150')
   return (
-    <div className="flex min-h-screen items-center justify-center bg-mata-900/5 p-6">
+    <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <button onClick={onVoltar} className="mb-4 text-sm text-mata-900/35 hover:text-mata-700">← backoffice</button>
         <div className="card card-pad">

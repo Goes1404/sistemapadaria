@@ -54,7 +54,7 @@ export default function Estoque() {
             <button
               key={f}
               onClick={() => setFiltro(filtro === f ? 'TODOS' : f)}
-              className={`card card-pad text-left transition-all ${filtro === f ? 'ring-2 ring-bela-500' : 'hover:border-white/60'}`}
+              className={`vidro vidro-interativo card-pad text-left transition-all ${filtro === f ? "ring-2 ring-bela-500" : "hover:-translate-y-0.5"}`}
             >
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wide text-mata-900/50">{rotulos[f]}</p>
