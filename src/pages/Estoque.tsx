@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react'
 import { useStore } from '@/store'
 import { JANELA_AMARELO, classificarFarol, diasParaVencer, saldoDoInsumo } from '@/lib/fefo'
 import { brl, dataBR, dataHoraBR, num } from '@/lib/format'
-import { Badge, BadgeFarol, Card, PageHeader, Tabela, Vazio } from '@/components/ui'
+import { Badge, BadgeFarol, Card, PageHeader, Stat, Tabela, Vazio } from '@/components/ui'
 import type { Farol, Unidade } from '@/types'
 
-type Aba = 'lotes' | 'insumos' | 'movimentos'
+type Aba = 'lotes' | 'insumos' | 'movimentos' | 'perdas'
 
 export default function Estoque() {
   const { insumos, lotes, movimentosEstoque, cadastrarLote, cadastrarInsumo, descartarLote } = useStore()
@@ -54,40 +54,40 @@ export default function Estoque() {
             <button
               key={f}
               onClick={() => setFiltro(filtro === f ? 'TODOS' : f)}
-              className={`card card-pad text-left transition-all ${filtro === f ? 'ring-2 ring-crosta-500' : 'hover:border-stone-300'}`}
+              className={`card card-pad text-left transition-all ${filtro === f ? 'ring-2 ring-bela-500' : 'hover:border-white/60'}`}
             >
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{rotulos[f]}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-mata-900/50">{rotulos[f]}</p>
                 <BadgeFarol farol={f} texto={f === 'VERMELHO' ? '🔴' : f === 'AMARELO' ? '🟡' : '🟢'} />
               </div>
               <p className="mt-2 text-3xl font-bold tabular-nums">{contagem[f]}</p>
-              <p className="mt-0.5 text-xs text-stone-500">lotes com saldo</p>
+              <p className="mt-0.5 text-xs text-mata-900/50">lotes com saldo</p>
             </button>
           )
         })}
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <nav className="flex gap-1 rounded-lg bg-stone-200/70 p-1">
-          {([['lotes', 'Lotes'], ['insumos', 'Insumos'], ['movimentos', 'Movimentações']] as const).map(([id, rotulo]) => (
+        <nav className="flex gap-1 rounded-lg bg-mata-900/8 p-1">
+          {([['lotes', 'Lotes'], ['insumos', 'Insumos'], ['movimentos', 'Movimentações'], ['perdas', 'Perdas']] as const).map(([id, rotulo]) => (
             <button key={id} onClick={() => setAba(id)}
               className={`rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                aba === id ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}>
+                aba === id ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
               {rotulo}
             </button>
           ))}
         </nav>
         {aba === 'lotes' && (
-          <label className="ml-auto flex items-center gap-2 text-xs text-stone-600">
+          <label className="ml-auto flex items-center gap-2 text-xs text-mata-900/60">
             Alerta amarelo com
             <input type="number" min={1} max={30} value={janela}
                    onChange={(e) => setJanela(Math.max(1, Number(e.target.value)))}
-                   className="w-16 rounded-md border border-stone-300 px-2 py-1 text-sm" />
+                   className="w-16 rounded-md border border-white/60 px-2 py-1 text-sm" />
             dias de antecedência
           </label>
         )}
         {filtro !== 'TODOS' && (
-          <button onClick={() => setFiltro('TODOS')} className="text-xs font-semibold text-crosta-700 hover:underline">
+          <button onClick={() => setFiltro('TODOS')} className="text-xs font-semibold text-bela-700 hover:underline">
             Limpar filtro
           </button>
         )}
@@ -99,10 +99,10 @@ export default function Estoque() {
             <Tabela cabecalho={['Insumo', 'Lote', 'Saldo', 'Validade', 'Situação', 'Valor', '']}>
               {visiveis.map((l) => (
                 <tr key={l.id} className={l.quantidadeAtual === 0 ? 'opacity-45' : ''}>
-                  <td className="td font-medium text-stone-800">{nomeInsumo(l.insumoId)}</td>
-                  <td className="td font-mono text-xs text-stone-500">{l.codigo}</td>
+                  <td className="td font-medium text-mata-800">{nomeInsumo(l.insumoId)}</td>
+                  <td className="td font-mono text-xs text-mata-900/50">{l.codigo}</td>
                   <td className="td tabular-nums">
-                    {num(l.quantidadeAtual)} <span className="text-xs text-stone-400">{unidade(l.insumoId)}</span>
+                    {num(l.quantidadeAtual)} <span className="text-xs text-mata-900/35">{unidade(l.insumoId)}</span>
                   </td>
                   <td className="td tabular-nums">{dataBR(l.dataValidade)}</td>
                   <td className="td">
@@ -136,9 +136,9 @@ export default function Estoque() {
               const abaixo = saldo < i.estoqueMinimo
               return (
                 <tr key={i.id}>
-                  <td className="td font-medium text-stone-800">{i.nome}</td>
-                  <td className="td tabular-nums">{num(saldo)} <span className="text-xs text-stone-400">{i.unidade}</span></td>
-                  <td className="td tabular-nums text-stone-500">{num(i.estoqueMinimo)} {i.unidade}</td>
+                  <td className="td font-medium text-mata-800">{i.nome}</td>
+                  <td className="td tabular-nums">{num(saldo)} <span className="text-xs text-mata-900/35">{i.unidade}</span></td>
+                  <td className="td tabular-nums text-mata-900/50">{num(i.estoqueMinimo)} {i.unidade}</td>
                   <td className="td tabular-nums">{ativos}</td>
                   <td className="td">{abaixo ? <Badge tom="alerta">Repor</Badge> : <Badge tom="ok">Suficiente</Badge>}</td>
                 </tr>
@@ -154,16 +154,16 @@ export default function Estoque() {
             <Tabela cabecalho={['Quando', 'Insumo', 'Lote', 'Quantidade', 'Motivo', 'Referência']}>
               {movimentosEstoque.slice(0, 40).map((m) => (
                 <tr key={m.id}>
-                  <td className="td text-xs text-stone-500">{dataHoraBR(m.criadoEm)}</td>
-                  <td className="td font-medium text-stone-800">{nomeInsumo(m.insumoId)}</td>
-                  <td className="td font-mono text-xs text-stone-500">
+                  <td className="td text-xs text-mata-900/50">{dataHoraBR(m.criadoEm)}</td>
+                  <td className="td font-medium text-mata-800">{nomeInsumo(m.insumoId)}</td>
+                  <td className="td font-mono text-xs text-mata-900/50">
                     {lotes.find((l) => l.id === m.loteId)?.codigo ?? '—'}
                   </td>
-                  <td className={`td tabular-nums font-semibold ${m.quantidade < 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                  <td className={`td tabular-nums font-semibold ${m.quantidade < 0 ? 'text-red-600' : 'text-mata-700'}`}>
                     {m.quantidade > 0 ? '+' : ''}{num(m.quantidade)}
                   </td>
                   <td className="td"><Badge tom={m.quantidade < 0 ? 'alerta' : 'ok'}>{m.motivo}</Badge></td>
-                  <td className="td text-stone-500">{m.referencia}</td>
+                  <td className="td text-mata-900/50">{m.referencia}</td>
                 </tr>
               ))}
             </Tabela>
@@ -171,10 +171,106 @@ export default function Estoque() {
         </Card>
       )}
 
+      {aba === 'perdas' && <Perdas />}
+
       {abrirLote && <ModalLote onFechar={() => setAbrirLote(false)} />}
       {abrirInsumo && <ModalInsumo onFechar={() => setAbrirInsumo(false)} />}
     </>
   )
+
+  /**
+   * Perdas por vencimento — o número que justifica o sistema.
+   * Junta o que já foi descartado com o que ainda está em risco na prateleira.
+   */
+  function Perdas() {
+    const descartes = movimentosEstoque
+      .filter((m) => m.motivo === 'DESCARTE' || m.motivo === 'PERDA')
+      .map((m) => {
+        const lote = lotes.find((l) => l.id === m.loteId)
+        return {
+          ...m,
+          codigo: lote?.codigo ?? '—',
+          validade: lote?.dataValidade ?? '',
+          custo: Math.abs(m.quantidade) * (lote?.custoUnitario ?? 0),
+        }
+      })
+
+    const totalDescartado = descartes.reduce((s, d) => s + d.custo, 0)
+
+    const emRisco = enriquecidos.filter((l) => l.quantidadeAtual > 0 && l.farol !== 'VERDE')
+    const totalVencido = emRisco
+      .filter((l) => l.farol === 'VERMELHO')
+      .reduce((s, l) => s + l.quantidadeAtual * l.custoUnitario, 0)
+    const totalEmRisco = emRisco
+      .filter((l) => l.farol === 'AMARELO')
+      .reduce((s, l) => s + l.quantidadeAtual * l.custoUnitario, 0)
+
+    const porInsumo = emRisco.reduce<Record<string, number>>((acc, l) => {
+      acc[l.insumoId] = (acc[l.insumoId] ?? 0) + l.quantidadeAtual * l.custoUnitario
+      return acc
+    }, {})
+    const maior = Math.max(1, ...Object.values(porInsumo))
+
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Stat rotulo="Já descartado" valor={brl(totalDescartado)}
+                detalhe={`${descartes.length} ${descartes.length === 1 ? 'descarte' : 'descartes'}`}
+                tom={totalDescartado > 0 ? 'erro' : 'ok'} />
+          <Stat rotulo="Vencido na prateleira" valor={brl(totalVencido)}
+                detalhe="perda certa se não agir hoje" tom={totalVencido > 0 ? 'erro' : 'ok'} />
+          <Stat rotulo="Em risco" valor={brl(totalEmRisco)}
+                detalhe={`vence em até ${janela} dias`} tom={totalEmRisco > 0 ? 'alerta' : 'ok'} />
+        </div>
+
+        <Card titulo="Onde o dinheiro está em risco">
+          {Object.keys(porInsumo).length === 0 ? (
+            <Vazio mensagem="Nenhum insumo em risco de vencimento." />
+          ) : (
+            <ul className="space-y-3.5">
+              {Object.entries(porInsumo)
+                .sort(([, a], [, b]) => b - a)
+                .map(([insumoId, valor]) => (
+                  <li key={insumoId}>
+                    <div className="mb-1.5 flex justify-between text-sm">
+                      <span className="font-medium text-mata-700">{nomeInsumo(insumoId)}</span>
+                      <span className="font-semibold tabular-nums">{brl(valor)}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-mata-900/5">
+                      <div className="h-full rounded-full bg-red-500" style={{ width: `${(valor / maior) * 100}%` }} />
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          )}
+          <p className="mt-4 border-t border-white/40 pt-3 text-xs text-mata-900/50">
+            Priorize promoção ou uso em produção pelos itens do topo — é onde o desconto dói menos
+            que o descarte.
+          </p>
+        </Card>
+
+        <Card titulo="Histórico de descartes">
+          {descartes.length === 0 ? (
+            <Vazio mensagem="Nenhum descarte registrado ainda. Descarte um lote vencido na aba Lotes para ver o registro aqui." />
+          ) : (
+            <Tabela cabecalho={['Quando', 'Insumo', 'Lote', 'Quantidade', 'Prejuízo']}>
+              {descartes.map((d) => (
+                <tr key={d.id}>
+                  <td className="td text-xs text-mata-900/50">{dataHoraBR(d.criadoEm)}</td>
+                  <td className="td font-medium text-mata-800">{nomeInsumo(d.insumoId)}</td>
+                  <td className="td font-mono text-xs text-mata-900/50">{d.codigo}</td>
+                  <td className="td tabular-nums">
+                    {num(Math.abs(d.quantidade), 3)} {unidade(d.insumoId)}
+                  </td>
+                  <td className="td text-right font-semibold tabular-nums text-red-700">{brl(d.custo)}</td>
+                </tr>
+              ))}
+            </Tabela>
+          )}
+        </Card>
+      </div>
+    )
+  }
 
   function ModalLote({ onFechar }: { onFechar: () => void }) {
     const [insumoId, setInsumoId] = useState(insumos[0]?.id ?? '')
@@ -282,11 +378,13 @@ export function Modal({ titulo, children, onFechar }: {
   titulo: string; children: React.ReactNode; onFechar: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 p-4" onClick={onFechar}>
-      <div className="w-full max-w-lg rounded-xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <header className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
-          <h2 className="font-semibold text-stone-900">{titulo}</h2>
-          <button onClick={onFechar} className="text-xl leading-none text-stone-400 hover:text-stone-700">×</button>
+    <div className="anima-entrada fixed inset-0 z-50 flex items-center justify-center bg-mata-900/45 p-4"
+         onClick={onFechar}>
+      <div className="anima-subida max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-xl"
+           onClick={(e) => e.stopPropagation()}>
+        <header className="flex items-center justify-between border-b border-white/50 px-5 py-4">
+          <h2 className="font-semibold text-mata-900">{titulo}</h2>
+          <button onClick={onFechar} className="text-xl leading-none text-mata-900/35 hover:text-mata-700">×</button>
         </header>
         <div className="p-5">{children}</div>
       </div>

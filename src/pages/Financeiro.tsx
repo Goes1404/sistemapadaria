@@ -40,10 +40,10 @@ export default function Financeiro() {
       <PageHeader titulo="Fluxo de caixa do dia" subtitulo="Entradas e saídas em tempo real, PDV e WhatsApp somados." />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat rotulo="Entradas" valor={brl(entradas)} detalhe={`${doDia.length} vendas`} tom="ok" />
-        <Stat rotulo="Sangrias" valor={brl(sangrias)} detalhe="retiradas do caixa" tom={sangrias > 0 ? 'alerta' : 'neutro'} />
-        <Stat rotulo="Suprimentos" valor={brl(suprimentos)} detalhe="reforço de troco" />
-        <Stat rotulo="Esperado em gaveta" valor={brl(dinheiroEmGaveta)} detalhe="só o dinheiro físico" />
+        <Stat rotulo="Entradas" valor={brl(entradas)} numero={entradas} formatar={brl} detalhe={`${doDia.length} vendas`} tom="ok" />
+        <Stat rotulo="Sangrias" valor={brl(sangrias)} numero={sangrias} formatar={brl} detalhe="retiradas do caixa" tom={sangrias > 0 ? 'alerta' : 'neutro'} />
+        <Stat rotulo="Suprimentos" valor={brl(suprimentos)} numero={suprimentos} formatar={brl} detalhe="reforço de troco" />
+        <Stat rotulo="Esperado em gaveta" valor={brl(dinheiroEmGaveta)} numero={dinheiroEmGaveta} formatar={brl} detalhe="só o dinheiro físico" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -55,11 +55,11 @@ export default function Financeiro() {
                 .map(([forma, valor]) => (
                   <li key={forma}>
                     <div className="mb-1.5 flex justify-between text-sm">
-                      <span className="font-medium text-stone-700">{rotuloForma[forma as FormaPagamento]}</span>
+                      <span className="font-medium text-mata-700">{rotuloForma[forma as FormaPagamento]}</span>
                       <span className="font-semibold tabular-nums">{brl(valor)}</span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-stone-100">
-                      <div className="h-full rounded-full bg-crosta-500" style={{ width: `${(valor / maiorForma) * 100}%` }} />
+                    <div className="h-2 overflow-hidden rounded-full bg-mata-900/5">
+                      <div className="h-full rounded-full bg-bela-500" style={{ width: `${(valor / maiorForma) * 100}%` }} />
                     </div>
                   </li>
                 ))}
@@ -75,29 +75,29 @@ export default function Financeiro() {
               return (
                 <li key={origem}>
                   <div className="mb-1.5 flex justify-between text-sm">
-                    <span className="font-medium text-stone-700">
+                    <span className="font-medium text-mata-700">
                       {origem === 'PDV' ? 'Balcão (PDV)' : 'Encomendas WhatsApp'}
                     </span>
                     <span className="font-semibold tabular-nums">
-                      {brl(valor)} <span className="text-xs font-normal text-stone-400">{pct.toFixed(0)}%</span>
+                      {brl(valor)} <span className="text-xs font-normal text-mata-900/35">{pct.toFixed(0)}%</span>
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-stone-100">
-                    <div className={`h-full rounded-full ${origem === 'PDV' ? 'bg-stone-600' : 'bg-emerald-500'}`}
+                  <div className="h-2 overflow-hidden rounded-full bg-mata-900/5">
+                    <div className={`h-full rounded-full ${origem === 'PDV' ? 'bg-mata-700' : 'bg-bela-500'}`}
                          style={{ width: `${pct}%` }} />
                   </div>
                 </li>
               )
             })}
           </ul>
-          <div className="mt-5 rounded-lg bg-stone-50 p-4 text-sm">
+          <div className="mt-5 rounded-lg bg-white/40 p-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-stone-600">Troco inicial</span>
+              <span className="text-mata-900/60">Troco inicial</span>
               <span className="tabular-nums">{brl(caixa.trocoInicial)}</span>
             </div>
-            <div className="mt-2 flex justify-between border-t border-stone-200 pt-2 font-semibold">
-              <span className="text-stone-800">Resultado do dia</span>
-              <span className="tabular-nums text-emerald-700">{brl(entradas - sangrias + suprimentos)}</span>
+            <div className="mt-2 flex justify-between border-t border-white/50 pt-2 font-semibold">
+              <span className="text-mata-800">Resultado do dia</span>
+              <span className="tabular-nums text-mata-700">{brl(entradas - sangrias + suprimentos)}</span>
             </div>
           </div>
         </Card>
@@ -109,12 +109,12 @@ export default function Financeiro() {
             <Tabela cabecalho={['Hora', 'Origem', 'Itens', 'Pagamento', 'Total']}>
               {doDia.map((v) => (
                 <tr key={v.id}>
-                  <td className="td text-xs text-stone-500">{horaBR(v.criadaEm)}</td>
+                  <td className="td text-xs text-mata-900/50">{horaBR(v.criadaEm)}</td>
                   <td className="td">
                     <Badge tom={v.origem === 'PDV' ? 'neutro' : 'ok'}>{v.origem}</Badge>
                   </td>
-                  <td className="td text-stone-600">{v.itens.length}</td>
-                  <td className="td text-xs text-stone-500">
+                  <td className="td text-mata-900/60">{v.itens.length}</td>
+                  <td className="td text-xs text-mata-900/50">
                     {v.pagamentos.map((p) => rotuloForma[p.forma]).join(' + ')}
                   </td>
                   <td className="td text-right font-semibold tabular-nums">{brl(v.total)}</td>
@@ -130,10 +130,10 @@ export default function Financeiro() {
               {movDia.map((m) => (
                 <li key={m.id} className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium text-stone-800">{m.observacao}</p>
-                    <p className="text-xs text-stone-500">{horaBR(m.criadoEm)}</p>
+                    <p className="text-sm font-medium text-mata-800">{m.observacao}</p>
+                    <p className="text-xs text-mata-900/50">{horaBR(m.criadoEm)}</p>
                   </div>
-                  <span className={`font-semibold tabular-nums ${m.motivo === 'SANGRIA' ? 'text-red-600' : 'text-emerald-700'}`}>
+                  <span className={`font-semibold tabular-nums ${m.motivo === 'SANGRIA' ? 'text-red-600' : 'text-mata-700'}`}>
                     {m.motivo === 'SANGRIA' ? '−' : '+'} {brl(m.valor)}
                   </span>
                 </li>

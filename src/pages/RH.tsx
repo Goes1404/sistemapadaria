@@ -53,8 +53,8 @@ export default function RH() {
               return (
                 <li key={c.id} className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-stone-800">{c.nome}</p>
-                    <p className="text-xs text-stone-500">{c.cargo.toLowerCase()}</p>
+                    <p className="text-sm font-semibold text-mata-800">{c.nome}</p>
+                    <p className="text-xs text-mata-900/50">{c.cargo.toLowerCase()}</p>
                   </div>
                   <Badge tom={s.tom}>{s.texto}</Badge>
                 </li>
@@ -68,8 +68,8 @@ export default function RH() {
             <ul className="space-y-3">
               {inconsistentes.map((r) => (
                 <li key={r.id} className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-stone-800">{nome(r.colaboradorId)}</p>
-                  <p className="mt-0.5 text-xs text-stone-600">
+                  <p className="text-sm font-semibold text-mata-800">{nome(r.colaboradorId)}</p>
+                  <p className="mt-0.5 text-xs text-mata-900/60">
                     Entrada em {dataHoraBR(r.registradoEm)} sem saída correspondente.
                   </p>
                   <button className="btn-danger mt-3 w-full py-2" onClick={() => setAjustando(r.id)}>
@@ -91,8 +91,8 @@ export default function RH() {
                 .slice(0, 25)
                 .map((r) => (
                   <tr key={r.id}>
-                    <td className="td font-medium text-stone-800">{nome(r.colaboradorId)}</td>
-                    <td className="td text-stone-600">{rotuloPonto[r.tipo]}</td>
+                    <td className="td font-medium text-mata-800">{nome(r.colaboradorId)}</td>
+                    <td className="td text-mata-900/60">{rotuloPonto[r.tipo]}</td>
                     <td className="td tabular-nums">{dataHoraBR(r.registradoEm)}</td>
                     <td className="td">
                       {r.inconsistencia ? <Badge tom="erro">Inconsistência</Badge> : <Badge tom="ok">OK</Badge>}
@@ -122,7 +122,7 @@ export default function RH() {
     const [hora, setHora] = useState('18:00')
     return (
       <Modal titulo="Ajustar registro de ponto" onFechar={onFechar}>
-        <p className="text-sm text-stone-600">
+        <p className="text-sm text-mata-900/60">
           <strong>{registro ? nome(registro.colaboradorId) : ''}</strong> registrou entrada às{' '}
           {registro ? horaBR(registro.registradoEm) : ''} e não registrou saída. Informe o horário real
           de encerramento do turno.
@@ -131,7 +131,7 @@ export default function RH() {
           <label className="label">Horário de saída</label>
           <input className="input" type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
         </div>
-        <p className="mt-3 text-xs text-stone-500">
+        <p className="mt-3 text-xs text-mata-900/50">
           O ajuste fica registrado com o seu usuário, para auditoria.
         </p>
         <div className="mt-5 flex justify-end gap-2">

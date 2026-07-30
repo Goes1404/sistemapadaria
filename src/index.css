@@ -1,31 +1,140 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  html { -webkit-tap-highlight-color: transparent; }
-  body { @apply bg-stone-100 text-stone-800 antialiased; }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  /*
+   * Fundo em malha suave nas cores da marca. O vidro só lê como vidro se
+   * houver algo colorido atrás dele para refratar — num cinza chapado o
+   * efeito some.
+   */
+  body {
+    @apply min-h-screen text-mata-900 antialiased;
+    background-color: #eef1ec;
+    background-image:
+      radial-gradient(44rem 34rem at 4% -6%, rgba(245, 166, 35, 0.72), transparent 58%),
+      radial-gradient(40rem 32rem at 104% 4%, rgba(62, 125, 85, 0.62), transparent 56%),
+      radial-gradient(36rem 30rem at 42% 108%, rgba(245, 166, 35, 0.55), transparent 58%),
+      radial-gradient(30rem 28rem at 82% 66%, rgba(31, 74, 44, 0.32), transparent 60%),
+      radial-gradient(26rem 24rem at 20% 58%, rgba(250, 187, 60, 0.34), transparent 62%);
+    background-attachment: fixed;
+  }
+
+  :focus-visible { @apply outline-none ring-2 ring-bela-500/50 ring-offset-1; }
+
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-mata-800/20; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-mata-800/35; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
 }
 
 @layer components {
-  .card {
-    @apply rounded-xl border border-stone-200 bg-white shadow-sm;
+  /*
+   * Vidro líquido.
+   *
+   * Três camadas empilhadas, como o material da Apple:
+   *   1. base translúcida com backdrop-blur + saturate (refração)
+   *   2. ::before — brilho especular que segue o cursor (--bx / --by)
+   *   3. ::after  — borda interna clara no topo, escura embaixo (espessura)
+   */
+  .vidro {
+    @apply relative isolate overflow-hidden rounded-2xl border border-white/65
+           bg-white/55 shadow-vidro transition-shadow duration-300;
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
   }
+
+  .vidro::before {
+    content: '';
+    @apply pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300;
+    background: radial-gradient(
+      18rem 18rem at calc(var(--bx, 50) * 1%) calc(var(--by, 0) * 1%),
+      rgba(255, 255, 255, 0.85),
+      rgba(255, 255, 255, 0) 65%
+    );
+  }
+
+  .vidro::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 -z-10 rounded-2xl;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0) 32%,
+      rgba(255, 255, 255, 0) 70%,
+      rgba(31, 74, 44, 0.05) 100%
+    );
+  }
+
+  .vidro-interativo:hover { @apply shadow-vidro-alto; }
+  .vidro-interativo:hover::before { @apply opacity-100; }
+
+  /* Vidro escuro, para os terminais de loja */
+  .vidro-escuro {
+    @apply relative isolate overflow-hidden rounded-2xl border border-white/10
+           bg-white/[0.07] shadow-vidro;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .card { @apply vidro; }
   .card-pad { @apply p-5; }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold
-           transition-colors disabled:cursor-not-allowed disabled:opacity-40;
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl
+           px-4 py-2.5 text-sm font-semibold transition-all duration-200
+           active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40
+           disabled:active:scale-100;
   }
-  .btn-primary { @apply btn bg-crosta-600 text-white hover:bg-crosta-700; }
-  .btn-ghost   { @apply btn border border-stone-300 bg-white text-stone-700 hover:bg-stone-50; }
-  .btn-danger  { @apply btn bg-red-600 text-white hover:bg-red-700; }
-  .btn-success { @apply btn bg-emerald-600 text-white hover:bg-emerald-700; }
+  .btn-primary {
+    @apply btn border border-bela-600/30 bg-gradient-to-b from-bela-400 to-bela-600
+           text-mata-900 shadow-[0_4px_14px_-4px_rgba(217,134,15,0.55)]
+           hover:from-bela-300 hover:to-bela-500 hover:shadow-[0_8px_22px_-6px_rgba(217,134,15,0.65)];
+  }
+  .btn-ghost {
+    @apply btn border border-white/60 bg-white/50 text-mata-800 backdrop-blur-md
+           hover:bg-white/80;
+  }
+  .btn-escuro {
+    @apply btn border border-mata-900/20 bg-gradient-to-b from-mata-700 to-mata-900
+           text-white shadow-[0_4px_14px_-4px_rgba(31,74,44,0.6)] hover:from-mata-600 hover:to-mata-800;
+  }
+  .btn-danger {
+    @apply btn border border-red-700/30 bg-gradient-to-b from-red-500 to-red-700 text-white
+           shadow-[0_4px_14px_-4px_rgba(185,28,28,0.5)] hover:from-red-400 hover:to-red-600;
+  }
+  .btn-success {
+    @apply btn border border-mata-700/30 bg-gradient-to-b from-mata-500 to-mata-700 text-white
+           shadow-[0_4px_14px_-4px_rgba(38,80,55,0.5)] hover:from-mata-400 hover:to-mata-600;
+  }
+
   .input {
-    @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm
-           outline-none focus:border-crosta-500 focus:ring-2 focus:ring-crosta-500/20;
+    @apply w-full rounded-xl border border-white/60 bg-white/70 px-3.5 py-2.5 text-sm
+           text-mata-900 backdrop-blur-md transition-all outline-none
+           placeholder:text-mata-900/35
+           focus:border-bela-400 focus:bg-white/90 focus:ring-2 focus:ring-bela-500/25;
   }
-  .label { @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500; }
-  .th { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-500; }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-mata-900/55;
+  }
+  .th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mata-900/50;
+  }
   .td { @apply px-4 py-3 text-sm; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
 }

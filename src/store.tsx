@@ -49,6 +49,7 @@ interface Estado {
   baterPonto: (pin: string) => { ok: boolean; mensagem: string; colaborador?: Colaborador }
   resolverInconsistencia: (registroId: string, novaHora: string) => void
   cadastrarColaborador: (dados: Omit<Colaborador, 'id' | 'ativo'>) => void
+  cadastrarFicha: (dados: Omit<FichaTecnica, 'id'>) => void
   finalizarVenda: (venda: Omit<Venda, 'id' | 'criadaEm' | 'origem'>) => void
   abrirCaixa: (operador: string, troco: number) => void
   fecharCaixa: () => void
@@ -63,7 +64,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [lotes, setLotes] = useState<Lote[]>(seed.lotes)
   const [movimentosEstoque, setMovEstoque] = useState<MovimentoEstoque[]>(seed.movimentosEstoque)
   const [produtos] = useState<Produto[]>(seed.produtos)
-  const [fichas] = useState<FichaTecnica[]>(seed.fichas)
+  const [fichas, setFichas] = useState<FichaTecnica[]>(seed.fichas)
   const [fornadas, setFornadas] = useState<Fornada[]>(seed.fornadasIniciais as Fornada[])
   const [colaboradores, setColaboradores] = useState<Colaborador[]>(seed.colaboradores)
   const [registrosPonto, setRegistros] = useState<RegistroPonto[]>(seed.registrosPonto)
@@ -206,6 +207,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     cadastrarColaborador: (dados) =>
       setColaboradores((atual) => [...atual, { ...dados, id: uid(), ativo: true }]),
+
+    cadastrarFicha: (dados) =>
+      setFichas((atual) => [...atual, { ...dados, id: uid() }]),
 
     finalizarVenda: (venda) =>
       setVendas((atual) => [

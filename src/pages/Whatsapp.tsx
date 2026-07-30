@@ -25,11 +25,11 @@ export default function Whatsapp() {
         subtitulo="Os pedidos caem aqui. Ninguém precisa ficar com o celular na mão."
       />
 
-      <nav className="mb-5 flex gap-1 rounded-lg bg-stone-200/70 p-1">
+      <nav className="mb-5 flex gap-1 rounded-lg bg-mata-900/8 p-1">
         {([['painel', 'Painel de pedidos'], ['conversa', 'Como o cliente vê']] as const).map(([id, rotulo]) => (
           <button key={id} onClick={() => setAba(id)}
             className={`rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-              aba === id ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}>
+              aba === id ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
             {rotulo}
           </button>
         ))}
@@ -41,23 +41,23 @@ export default function Whatsapp() {
             {pendentes.length === 0 ? <Vazio mensagem="Nenhum pedido pendente." /> : (
               <ul className="space-y-4">
                 {pendentes.map((p) => (
-                  <li key={p.id} className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <li key={p.id} className="rounded-lg border border-bela-400/40 bg-bela-500/10 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-stone-900">{p.cliente}</p>
-                        <p className="text-xs text-stone-500">{p.telefone} · recebido {horaBR(p.recebidoEm)}</p>
+                        <p className="font-semibold text-mata-900">{p.cliente}</p>
+                        <p className="text-xs text-mata-900/50">{p.telefone} · recebido {horaBR(p.recebidoEm)}</p>
                       </div>
-                      <span className="text-lg font-bold tabular-nums text-stone-900">{brl(p.total)}</span>
+                      <span className="text-lg font-bold tabular-nums text-mata-900">{brl(p.total)}</span>
                     </div>
-                    <ul className="mt-3 space-y-1 border-t border-amber-200 pt-3 text-sm">
+                    <ul className="mt-3 space-y-1 border-t border-bela-400/40 pt-3 text-sm">
                       {p.itens.map((i, idx) => (
-                        <li key={idx} className="flex justify-between text-stone-700">
+                        <li key={idx} className="flex justify-between text-mata-700">
                           <span>{i.quantidade}× {i.nome}</span>
-                          <span className="tabular-nums text-stone-500">{brl(i.quantidade * i.precoUnitario)}</span>
+                          <span className="tabular-nums text-mata-900/50">{brl(i.quantidade * i.precoUnitario)}</span>
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-3 text-xs text-stone-600">Retirada às <strong>{p.retirarEm}</strong></p>
+                    <p className="mt-3 text-xs text-mata-900/60">Retirada às <strong>{p.retirarEm}</strong></p>
                     <div className="mt-4 flex gap-2">
                       <button className="btn-ghost flex-1 py-2" onClick={() => responderPedido(p.id, 'REJECTED')}>
                         Recusar
@@ -76,22 +76,22 @@ export default function Whatsapp() {
             {resto.length === 0 ? <Vazio mensagem="Sem histórico." /> : (
               <ul className="space-y-3">
                 {resto.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 border-b border-stone-100 pb-3 last:border-0">
+                  <li key={p.id} className="flex items-center justify-between gap-3 border-b border-white/40 pb-3 last:border-0">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-stone-800">{p.cliente}</p>
-                      <p className="text-xs text-stone-500">
+                      <p className="truncate text-sm font-semibold text-mata-800">{p.cliente}</p>
+                      <p className="text-xs text-mata-900/50">
                         {p.itens.length} {p.itens.length === 1 ? 'item' : 'itens'} · {horaBR(p.recebidoEm)}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                      <span className="text-sm font-semibold tabular-nums text-stone-700">{brl(p.total)}</span>
+                      <span className="text-sm font-semibold tabular-nums text-mata-700">{brl(p.total)}</span>
                       <Badge tom={rotuloStatus[p.status].tom}>{rotuloStatus[p.status].texto}</Badge>
                     </div>
                   </li>
                 ))}
               </ul>
             )}
-            <p className="mt-4 border-t border-stone-100 pt-3 text-xs text-stone-500">
+            <p className="mt-4 border-t border-white/40 pt-3 text-xs text-mata-900/50">
               Carrinho parado por mais de 15 minutos vira <strong>Abandonado</strong> automaticamente
               e a sessão do cliente é reiniciada.
             </p>
@@ -111,7 +111,7 @@ function Conversa() {
     {
       de: 'bot',
       texto:
-        'Olá! Aqui é a *Pão & Cia* 🥖\nEstamos abertos até as 19h.\n\nDigite o número da opção:\n\n*1* — Cardápio\n*2* — Fazer encomenda\n*3* — Horário e endereço',
+        'Olá! Aqui é a *Pães e Doces Bela Vista* 🥖\nEstamos abertos até as 19h.\n\nDigite o número da opção:\n\n*1* — Cardápio\n*2* — Fazer encomenda\n*3* — Horário e endereço',
     },
     { de: 'cliente', texto: '2' },
     {
@@ -138,9 +138,9 @@ function Conversa() {
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="mx-auto w-full max-w-sm rounded-2xl bg-[#0b141a] p-3 shadow-lg">
         <div className="mb-3 flex items-center gap-2.5 px-1 py-1.5">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-crosta-600 text-sm">🥖</span>
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-bela-600 text-sm">🥖</span>
           <div>
-            <p className="text-sm font-semibold text-white">Pão &amp; Cia</p>
+            <p className="text-sm font-semibold text-white">Pães e Doces Bela Vista</p>
             <p className="text-[11px] text-emerald-400">online</p>
           </div>
         </div>
@@ -158,22 +158,22 @@ function Conversa() {
 
       <div className="space-y-4">
         <Card titulo="Regras do bot">
-          <ul className="space-y-3 text-sm text-stone-600">
+          <ul className="space-y-3 text-sm text-mata-900/60">
             <li>
-              <strong className="text-stone-800">Menu fechado.</strong> O cliente navega por números.
+              <strong className="text-mata-800">Menu fechado.</strong> O cliente navega por números.
               Nada de texto livre — reduz erro e não exige IA.
             </li>
             <li>
-              <strong className="text-stone-800">Validação de horário.</strong> Fora do expediente,
+              <strong className="text-mata-800">Validação de horário.</strong> Fora do expediente,
               o bot informa o horário de funcionamento e não abre o fluxo de encomenda.
             </li>
             <li>
-              <strong className="text-stone-800">Timeout de 15 minutos.</strong> Carrinho parado é
-              marcado como <code className="rounded bg-stone-100 px-1 text-xs">ABORTED</code> e a sessão reinicia.
+              <strong className="text-mata-800">Timeout de 15 minutos.</strong> Carrinho parado é
+              marcado como <code className="rounded bg-mata-900/5 px-1 text-xs">ABORTED</code> e a sessão reinicia.
             </li>
             <li>
-              <strong className="text-stone-800">Confirmação assíncrona.</strong> O pedido nasce como{' '}
-              <code className="rounded bg-stone-100 px-1 text-xs">PENDING_CONFIRMATION</code>. O cliente só
+              <strong className="text-mata-800">Confirmação assíncrona.</strong> O pedido nasce como{' '}
+              <code className="rounded bg-mata-900/5 px-1 text-xs">PENDING_CONFIRMATION</code>. O cliente só
               recebe a confirmação depois que alguém aceita no painel — a padaria nunca se compromete
               com um pedido que não consegue atender.
             </li>
