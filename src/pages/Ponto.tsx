@@ -14,7 +14,13 @@ export default function Ponto() {
   const navigate = useNavigate()
   const [pin, setPin] = useState('')
   const [relogio, setRelogio] = useState(new Date())
-  const [feedback, setFeedback] = useState<{ ok: boolean; titulo: string; texto: string } | null>(null)
+  const [feedback, setFeedback] = useState<{
+    ok: boolean
+    titulo: string
+    texto: string
+    /** Comprovante que o trabalhador tem direito de receber a cada marcação. */
+    comprovante?: { nsr: number; hash: string; registradoEm: string }
+  } | null>(null)
   const cartao = useRef<HTMLDivElement>(null)
   const pontos = useRef<HTMLDivElement>(null)
 
@@ -31,7 +37,7 @@ export default function Ponto() {
         duration: 0.5, ease: 'back.out(1.7)',
       })
     }
-    const t = setTimeout(() => setFeedback(null), 4000)
+    const t = setTimeout(() => setFeedback(null), 8000)
     return () => clearTimeout(t)
   }, [feedback])
 
@@ -62,7 +68,14 @@ export default function Ponto() {
     if (!r.ok) errar()
     setFeedback(
       r.ok
-        ? { ok: true, titulo: r.mensagem, texto: `${r.colaborador?.nome} · ${relogio.toLocaleTimeString('pt-BR')}` }
+        ? {
+            ok: true,
+            titulo: r.mensagem,
+            texto: r.colaborador?.nome ?? '',
+            comprovante: r.comprovante
+              ? { nsr: r.comprovante.nsr, hash: r.comprovante.hash, registradoEm: r.comprovante.registradoEm }
+              : undefined,
+          }
         : { ok: false, titulo: 'Não foi possível registrar', texto: r.mensagem },
     )
     setPin('')
@@ -99,13 +112,40 @@ export default function Ponto() {
 
       {feedback ? (
         <div ref={cartao}
-             className={`vidro-escuro w-full max-w-xs p-6 text-center ${
+             className={`vidro-escuro w-full max-w-sm p-6 text-center ${
                feedback.ok ? 'ring-1 ring-mata-400/40' : 'ring-1 ring-red-400/40'}`}>
           <p className={`text-4xl ${feedback.ok ? 'text-mata-300' : 'text-red-300'}`}>
             {feedback.ok ? '✓' : '✕'}
           </p>
           <p className="mt-2 text-lg font-bold">{feedback.titulo}</p>
           <p className="mt-1 text-sm text-white/60">{feedback.texto}</p>
+
+          {feedback.comprovante && (
+            <div className="mt-4 rounded-xl border border-white/15 bg-white/[0.06] p-3 text-left">
+              <p className="mb-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white/40">
+                Comprovante de registro
+              </p>
+              <dl className="space-y-1 text-[11px]">
+                <div className="flex justify-between">
+                  <dt className="text-white/45">NSR</dt>
+                  <dd className="font-mono text-white/80">{feedback.comprovante.nsr}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-white/45">Horário</dt>
+                  <dd className="font-mono text-white/80">
+                    {new Date(feedback.comprovante.registradoEm).toLocaleString('pt-BR')}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="shrink-0 text-white/45">Hash</dt>
+                  <dd className="truncate font-mono text-white/80">{feedback.comprovante.hash}</dd>
+                </div>
+              </dl>
+              <p className="mt-2 text-center text-[10px] text-white/35">
+                Guarde este comprovante — ele prova que o registro não foi alterado.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <>

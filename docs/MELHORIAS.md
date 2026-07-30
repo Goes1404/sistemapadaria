@@ -32,7 +32,7 @@ o trabalho é preencher, não desenhar do zero.
 | 11 | Delivery (iFood/Rappi) e cardápio digital | Médio-alto | Alto | v2 |
 | 12 | Previsão de demanda | Médio | Alto | v3 |
 | 13 | Compras: sugestão e cotação | Médio | Médio | v3 |
-| 14 | Multi-loja | Depende do cliente | Alto | sob demanda |
+| ~~14~~ | ~~Multi-loja~~ | — | — | **descartado pelo cliente** |
 
 ---
 
@@ -244,11 +244,13 @@ Sugestão de pedido a partir do estoque mínimo, do consumo médio e do prazo de
 Cotação com múltiplos fornecedores e histórico de preço pago — que também serve para perceber
 aumento de custo antes de ele comer a margem.
 
-### 15. Multi-loja
+### 15. Multi-loja — **descartado**
 
-Só se o cliente tiver ou planejar mais de uma unidade. Muda o modelo de dados inteiro (tudo passa
-a ter `lojaId`), então a decisão precisa ser tomada **antes** da primeira migration, mesmo que a
-implementação venha depois. É a única coisa desta seção que não pode ser adiada como decisão.
+Decisão do cliente: a Bela Vista opera uma unidade só e não há plano de segunda loja. Fica
+registrado que **não** haverá `lojaId` no modelo de dados.
+
+Consequência a assumir de olhos abertos: se a decisão mudar, adicionar multi-loja depois exige
+reescrever toda consulta do sistema. É o custo aceito em troca de um modelo mais simples agora.
 
 ---
 
@@ -267,10 +269,9 @@ implementação venha depois. É a única coisa desta seção que não pode ser 
 
 ## Impacto no modelo de dados já planejado
 
-Três decisões precisam ser tomadas **antes da primeira migration**, porque mudá-las depois é caro:
+Duas decisões precisam ser tomadas **antes da primeira migration**, porque mudá-las depois é caro:
 
-1. **Multi-loja.** Incluir `lojaId` desde o início, mesmo com uma loja só, se houver qualquer
-   perspectiva de segunda unidade. Adicionar depois significa reescrever toda consulta do sistema.
+1. ~~**Multi-loja.**~~ Descartado pelo cliente — sem `lojaId` no modelo.
 2. **Campos fiscais no produto.** NCM, CFOP, origem, CEST, CST/CSOSN. Adicionar colunas depois é
    fácil; o difícil é preencher o cadastro inteiro retroativamente com o contador.
 3. **Auditoria desde o primeiro dia.** Uma tabela de eventos que registra ator, ação, entidade e

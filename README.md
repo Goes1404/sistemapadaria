@@ -28,9 +28,13 @@ sem ele, abrir `/pdv` direto ou recarregar a página daria 404.
 | `/app/producao` | Ficha técnica, registro de fornada, pauta do dia | Padeiro |
 | `/app/whatsapp` | Painel de encomendas + simulação da conversa | Atendente |
 | `/app/rh` | Equipe, registros e inconsistências de ponto | Gerente |
+| `/app/clientes` | Base, clube do pão e campanhas | Gerente |
 | `/app/financeiro` | Fluxo de caixa do dia | Gerente |
+| `/app/bi` | Tendência, venda por horário, curva ABC | Gerente |
+| `/app/auditoria` | Quem fez o quê, quando e com que autorização | Gerente |
 | `/pdv` | Frente de caixa (tablet) | Operador — abre sem login |
 | `/ponto` | Terminal de ponto por PIN (tablet) | Toda a equipe — abre sem login |
+| `/kds` | Tela da cozinha | Padeiro / copa — abre sem login |
 
 PINs da demo: `1234` Marcos · `2345` Ana · `3456` Rafael · `4567` Juliana · `5678` Carlos.
 
@@ -83,6 +87,32 @@ Não são telas estáticas — a lógica roda no cliente e é a mesma que o back
   página é uma malha de gradientes da marca — sem cor atrás, vidro não parece vidro.
 - **GSAP** (`src/lib/anima.ts`): entrada em cascata a cada troca de tela, contadores animados nos
   indicadores, resposta tátil no teclado do ponto. Tudo desligado sob `prefers-reduced-motion`.
+
+## Recursos de mercado já demonstrados
+
+O levantamento em [`docs/MELHORIAS.md`](docs/MELHORIAS.md) virou funcionalidade no protótipo:
+
+- **Etiqueta de balança (EAN-13 de peso variável)** — bipar a etiqueta traz o peso dentro do
+  código, sem digitar nada. Os botões de simulação no PDV usam EAN-13 reais, com dígito
+  verificador correto.
+- **NFC-e simulada** — numeração por série, chave de acesso de 44 dígitos com DV, QR de consulta
+  e **contingência**: clique em "SEFAZ online" no PDV para derrubar o serviço e ver a venda
+  continuar. Ao religar, os documentos pendentes são transmitidos.
+- **TEF e PIX** — pinpad com espera e recusa possível, e QR do PIX gerado com BR Code no formato
+  EMV real (CRC-16 incluso), legível por qualquer app de banco.
+- **Cliente e fidelidade** — identificação no caixa, pontos acumulados na venda, clube de
+  assinatura com a demanda entrando na pauta de produção.
+- **Auditoria e alçada** — sangria e desconto acima de 10% exigem PIN de gerente, e os dois nomes
+  ficam registrados.
+- **Ponto conforme a legislação** — marcação imutável com NSR e hash encadeado, comprovante ao
+  trabalhador, ajuste que não sobrescreve o original, verificação de integridade e exportação do AFD.
+- **Perdas de balcão** — a sobra do fim do dia, que é a perda que mais dói e não aparecia no
+  relatório de vencimento.
+- **Importação do XML da NF-e** — lê a nota do fornecedor de verdade (DOMParser), resolve produtos
+  pelo de-para aprendido, e pede só lote e validade, que não vêm no XML.
+- **KDS** — fila da cozinha com cronômetro por pedido, acendendo aos 6 e aos 12 minutos.
+- **BI** — série histórica de 21 dias, venda por faixa de horário com os dois picos da padaria,
+  CMV, margem e curva ABC.
 
 ## Próxima etapa: da demo para a v1
 

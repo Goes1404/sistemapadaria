@@ -11,13 +11,17 @@ const navegacao = [
   { para: '/app/estoque', rotulo: 'Estoque', icone: '▤' },
   { para: '/app/producao', rotulo: 'Produção', icone: '◉' },
   { para: '/app/whatsapp', rotulo: 'Encomendas', icone: '✆' },
+  { para: '/app/clientes', rotulo: 'Clientes', icone: '♥' },
   { para: '/app/rh', rotulo: 'Equipe', icone: '☺' },
   { para: '/app/financeiro', rotulo: 'Financeiro', icone: '$' },
+  { para: '/app/bi', rotulo: 'Inteligência', icone: '◫' },
+  { para: '/app/auditoria', rotulo: 'Auditoria', icone: '⚖' },
 ]
 
 const externos = [
   { para: '/pdv', rotulo: 'Abrir PDV', icone: '▣' },
   { para: '/ponto', rotulo: 'Terminal de Ponto', icone: '⏱' },
+  { para: '/kds', rotulo: 'Tela da Cozinha', icone: '☰' },
 ]
 
 export default function Layout() {
