@@ -14,6 +14,7 @@ const navegacao = [
   { para: '/app/clientes', rotulo: 'Clientes', icone: '♥' },
   { para: '/app/rh', rotulo: 'Equipe', icone: '☺' },
   { para: '/app/financeiro', rotulo: 'Financeiro', icone: '$' },
+  { para: '/app/produtos', rotulo: 'Produtos', icone: '▦' },
   { para: '/app/bi', rotulo: 'Inteligência', icone: '◫' },
   { para: '/app/auditoria', rotulo: 'Auditoria', icone: '⚖' },
 ]

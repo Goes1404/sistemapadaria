@@ -18,6 +18,7 @@ import type {
   PedidoCozinha,
   DeParaProduto,
   EventoAuditoria,
+  CustoOperacional,
 } from '@/types'
 
 /** Data-base fixa da demo, para o farol de validade ser sempre previsível. */
@@ -48,6 +49,12 @@ export const insumos: Insumo[] = [
   { id: 'i6', nome: 'Ovos', unidade: 'UN', estoqueMinimo: 60 },
   { id: 'i7', nome: 'Açúcar Refinado', unidade: 'KG', estoqueMinimo: 10 },
   { id: 'i8', nome: 'Presunto Fatiado', unidade: 'KG', estoqueMinimo: 3 },
+  { id: 'i9', nome: 'Café em Grão', unidade: 'KG', estoqueMinimo: 4 },
+  { id: 'i10', nome: 'Queijo Mussarela', unidade: 'KG', estoqueMinimo: 4 },
+  { id: 'i11', nome: 'Polvilho Azedo', unidade: 'KG', estoqueMinimo: 8 },
+  { id: 'i12', nome: 'Laranja', unidade: 'KG', estoqueMinimo: 15 },
+  { id: 'i13', nome: 'Mortadela', unidade: 'KG', estoqueMinimo: 3 },
+  { id: 'i14', nome: 'Embalagem e Descartáveis', unidade: 'UN', estoqueMinimo: 300 },
 ]
 
 export const lotes: Lote[] = [
@@ -70,6 +77,13 @@ export const lotes: Lote[] = [
   { id: 'l10', insumoId: 'i6', codigo: 'OV-311', quantidadeInicial: 360, quantidadeAtual: 210, dataValidade: emDias(3), custoUnitario: 0.75, status: 'ATIVO' },
   { id: 'l11', insumoId: 'i7', codigo: 'AC-208', quantidadeInicial: 25, quantidadeAtual: 22, dataValidade: emDias(180), custoUnitario: 3.6, status: 'ATIVO' },
   { id: 'l12', insumoId: 'i8', codigo: 'PR-045', quantidadeInicial: 8, quantidadeAtual: 2.4, dataValidade: emDias(1), custoUnitario: 32.0, status: 'ATIVO' },
+
+  { id: 'l13', insumoId: 'i9', codigo: 'CF-220', quantidadeInicial: 20, quantidadeAtual: 14, dataValidade: emDias(150), custoUnitario: 42.0, status: 'ATIVO' },
+  { id: 'l14', insumoId: 'i10', codigo: 'MZ-334', quantidadeInicial: 10, quantidadeAtual: 6.5, dataValidade: emDias(18), custoUnitario: 44.9, status: 'ATIVO' },
+  { id: 'l15', insumoId: 'i11', codigo: 'PV-118', quantidadeInicial: 25, quantidadeAtual: 19, dataValidade: emDias(200), custoUnitario: 12.4, status: 'ATIVO' },
+  { id: 'l16', insumoId: 'i12', codigo: 'LR-901', quantidadeInicial: 60, quantidadeAtual: 38, dataValidade: emDias(6), custoUnitario: 3.9, status: 'ATIVO' },
+  { id: 'l17', insumoId: 'i13', codigo: 'MT-702', quantidadeInicial: 8, quantidadeAtual: 5.2, dataValidade: emDias(14), custoUnitario: 24.5, status: 'ATIVO' },
+  { id: 'l18', insumoId: 'i14', codigo: 'EM-050', quantidadeInicial: 2000, quantidadeAtual: 1450, dataValidade: emDias(720), custoUnitario: 0.18, status: 'ATIVO' },
 ]
 
 export const produtos: Produto[] = [
@@ -96,17 +110,27 @@ export const produtos: Produto[] = [
   { id: 'p11', nome: 'Torta Salgada (fatia)', preco: 11.5, porPeso: false, codigoBarras: '7891000011',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p12', nome: 'Água Mineral 500ml', preco: 4.0, porPeso: false, codigoBarras: '7891000012',
+    custoCompra: 1.35, // revenda: não tem ficha, o custo é o preço de compra
     fiscal: { ncm: '22011000', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p13', nome: 'Mortadela Fatiada (kg)', preco: 39.9, porPeso: true, codigoBarras: '7891000013', codigoBalanca: '100013',
     fiscal: { ncm: '16024900', cfop: '5102', origem: '0', csosn: '102' } },
 ]
 
+/**
+ * Fichas técnicas de TODOS os produtos produzidos.
+ *
+ * Sem ficha, o produto entra no relatório com custo zero e infla a margem —
+ * era o que limitava a análise financeira a 21% do faturamento. Só a água
+ * mineral fica de fora, porque é revenda: o custo dela é o preço de compra
+ * (campo `custoCompra` no produto).
+ *
+ * O rendimento é sempre na unidade em que o produto é VENDIDO: pão francês
+ * rende quilos, croissant rende unidades.
+ */
 export const fichas: FichaTecnica[] = [
   {
-    id: 'f1',
-    produtoId: 'p1',
-    nome: 'Pão Francês — fornada de 100 un',
-    rendimento: 100,
+    id: 'f1', produtoId: 'p1', nome: 'Pão Francês — massa de 6 kg de farinha',
+    rendimento: 8.5, // kg de pão assado
     itens: [
       { insumoId: 'i1', quantidade: 6 },
       { insumoId: 'i2', quantidade: 60 },
@@ -114,9 +138,7 @@ export const fichas: FichaTecnica[] = [
     ],
   },
   {
-    id: 'f2',
-    produtoId: 'p3',
-    nome: 'Bolo de Cenoura — 1 bolo (12 fatias)',
+    id: 'f2', produtoId: 'p3', nome: 'Bolo de Cenoura — 1 bolo (12 fatias)',
     rendimento: 12,
     itens: [
       { insumoId: 'i1', quantidade: 0.5 },
@@ -126,15 +148,92 @@ export const fichas: FichaTecnica[] = [
     ],
   },
   {
-    id: 'f3',
-    produtoId: 'p10',
-    nome: 'Croissant — fornada de 40 un',
+    id: 'f3', produtoId: 'p10', nome: 'Croissant — fornada de 40 un',
     rendimento: 40,
     itens: [
       { insumoId: 'i1', quantidade: 3 },
       { insumoId: 'i4', quantidade: 1.5 },
       { insumoId: 'i2', quantidade: 30 },
     ],
+  },
+  {
+    id: 'f4', produtoId: 'p2', nome: 'Pão de Queijo — fornada de 100 un',
+    rendimento: 100,
+    itens: [
+      { insumoId: 'i11', quantidade: 2.5 },
+      { insumoId: 'i10', quantidade: 1.2 },
+      { insumoId: 'i6', quantidade: 4 },
+      { insumoId: 'i5', quantidade: 0.5 },
+    ],
+  },
+  {
+    id: 'f5', produtoId: 'p4', nome: 'Sonho de Creme — fornada de 30 un',
+    rendimento: 30,
+    itens: [
+      { insumoId: 'i1', quantidade: 2 },
+      { insumoId: 'i6', quantidade: 6 },
+      { insumoId: 'i7', quantidade: 0.8 },
+      { insumoId: 'i5', quantidade: 1 },
+      { insumoId: 'i2', quantidade: 20 },
+    ],
+  },
+  {
+    id: 'f6', produtoId: 'p5', nome: 'Presunto Fatiado — porcionamento de 1 kg',
+    rendimento: 0.94, // 6% de perda no corte e nas pontas
+    itens: [{ insumoId: 'i8', quantidade: 1 }],
+  },
+  {
+    id: 'f7', produtoId: 'p6', nome: 'Café Expresso — 1 xícara',
+    rendimento: 1,
+    itens: [
+      { insumoId: 'i9', quantidade: 0.008 },
+      { insumoId: 'i14', quantidade: 1 },
+    ],
+  },
+  {
+    id: 'f8', produtoId: 'p7', nome: 'Misto Quente — 1 unidade',
+    rendimento: 1,
+    itens: [
+      { insumoId: 'i1', quantidade: 0.09 },
+      { insumoId: 'i8', quantidade: 0.05 },
+      { insumoId: 'i10', quantidade: 0.05 },
+      { insumoId: 'i4', quantidade: 0.008 },
+      { insumoId: 'i14', quantidade: 1 },
+    ],
+  },
+  {
+    id: 'f9', produtoId: 'p8', nome: 'Suco de Laranja 300 ml',
+    rendimento: 1,
+    itens: [
+      { insumoId: 'i12', quantidade: 0.55 },
+      { insumoId: 'i14', quantidade: 1 },
+    ],
+  },
+  {
+    id: 'f10', produtoId: 'p9', nome: 'Baguete Artesanal — fornada de 25 un',
+    rendimento: 25,
+    itens: [
+      { insumoId: 'i1', quantidade: 4 },
+      { insumoId: 'i2', quantidade: 40 },
+      { insumoId: 'i3', quantidade: 0.08 },
+    ],
+  },
+  {
+    id: 'f11', produtoId: 'p11', nome: 'Torta Salgada — 1 torta (10 fatias)',
+    rendimento: 10,
+    itens: [
+      { insumoId: 'i1', quantidade: 0.6 },
+      { insumoId: 'i6', quantidade: 3 },
+      { insumoId: 'i5', quantidade: 0.3 },
+      { insumoId: 'i8', quantidade: 0.35 },
+      { insumoId: 'i10', quantidade: 0.3 },
+      { insumoId: 'i14', quantidade: 10 },
+    ],
+  },
+  {
+    id: 'f12', produtoId: 'p13', nome: 'Mortadela Fatiada — porcionamento de 1 kg',
+    rendimento: 0.94,
+    itens: [{ insumoId: 'i13', quantidade: 1 }],
   },
 ]
 
@@ -362,11 +461,14 @@ export const deParaInicial: DeParaProduto[] = [
 // ---------------------------------------------------------------------------
 
 /**
- * Gera 21 dias de vendas com padrão realista de padaria.
+ * Gera 120 dias de vendas com padrão realista de padaria.
  *
- * Dois picos (manhã e fim de tarde), sábado mais forte, domingo mais fraco.
- * Sem esse formato, o gráfico por faixa de horário não ensinaria nada — e é
- * justamente ele que mostra onde dimensionar equipe e fornada.
+ * Dois picos (manhã e fim de tarde), sábado mais forte, domingo mais fraco,
+ * e uma leve tendência de crescimento ao longo dos meses. Sem esse formato,
+ * os gráficos não ensinariam nada — e são eles que mostram onde dimensionar
+ * equipe, fornada e mix de produtos.
+ *
+ * Quatro meses de histórico é o mínimo para a comparação mensal fazer sentido.
  */
 function gerarHistorico(): Venda[] {
   // Gerador determinístico: a demo precisa ser igual a cada recarga.
@@ -376,7 +478,10 @@ function gerarHistorico(): Venda[] {
     return semente / 2147483648
   }
 
-  const cardapio = produtos.filter((p) => !p.porPeso)
+  // Produtos por peso entram com quantidade em kg — pão francês é o carro-chefe
+  // de qualquer padaria e não pode ficar de fora do histórico.
+  const porUnidade = produtos.filter((p) => !p.porPeso)
+  const porPeso = produtos.filter((p) => p.porPeso)
   const pesoHora: Record<number, number> = {
     6: 0.7, 7: 1.6, 8: 1.9, 9: 1.2, 10: 0.8, 11: 0.9, 12: 1.0,
     13: 0.7, 14: 0.5, 15: 0.7, 16: 1.1, 17: 1.7, 18: 1.8, 19: 0.9,
@@ -386,10 +491,12 @@ function gerarHistorico(): Venda[] {
   const historico: Venda[] = []
   let contador = 0
 
-  for (let diasAtras = 21; diasAtras >= 1; diasAtras--) {
+  for (let diasAtras = 120; diasAtras >= 1; diasAtras--) {
     const dia = new Date(hoje)
     dia.setDate(dia.getDate() - diasAtras)
-    const fator = pesoDiaSemana[dia.getDay()]
+    // Crescimento suave ao longo do tempo: ~12% do começo ao fim da série.
+    const tendencia = 1 + ((120 - diasAtras) / 120) * 0.12
+    const fator = pesoDiaSemana[dia.getDay()] * tendencia
 
     for (const [horaTexto, peso] of Object.entries(pesoHora)) {
       const hora = Number(horaTexto)
@@ -401,7 +508,21 @@ function gerarHistorico(): Venda[] {
 
         const qtdItens = 1 + Math.floor(aleatorio() * 3)
         const itens = Array.from({ length: qtdItens }, () => {
-          const produto = cardapio[Math.floor(aleatorio() * cardapio.length)]
+          // Metade das cestas leva pão ou frios pesados — é o padrão da padaria.
+          if (aleatorio() < 0.45) {
+            const produto = porPeso[Math.floor(aleatorio() * porPeso.length)]
+            // Pão sai em porções maiores; frios, em fatias de 150 a 400 g.
+            const kg = produto.id === 'p1'
+              ? 0.2 + Math.round(aleatorio() * 10) / 10
+              : 0.15 + Math.round(aleatorio() * 25) / 100
+            return {
+              produtoId: produto.id,
+              nome: produto.nome,
+              quantidade: Math.round(kg * 1000) / 1000,
+              precoUnitario: produto.preco,
+            }
+          }
+          const produto = porUnidade[Math.floor(aleatorio() * porUnidade.length)]
           return {
             produtoId: produto.id,
             nome: produto.nome,
@@ -449,4 +570,32 @@ export const eventosAuditoria: EventoAuditoria[] = [
     entidade: 'Fornada', detalhe: '200 un de Pão Francês', terminal: 'BACKOFFICE' },
   { id: 'ev5', quando: horasAtras(20), ator: 'Ana Beatriz Lopes', acao: 'PERDA_REGISTRADA',
     entidade: 'PerdaBalcao', detalhe: '3,2 kg de Pão Francês — sobra do balcão', terminal: 'PDV' },
+]
+
+
+// ---------------------------------------------------------------------------
+// Custos operacionais fixos
+// ---------------------------------------------------------------------------
+
+/**
+ * Despesas mensais que não variam com o volume vendido.
+ *
+ * São elas que separam margem BRUTA de lucro LÍQUIDO. Uma padaria pode ter
+ * 70% de margem bruta e fechar o mês no vermelho — e o dono só descobre isso
+ * quando o custo fixo aparece rateado sobre cada produto.
+ */
+export const custosOperacionais: CustoOperacional[] = [
+  { id: 'co1', nome: 'Folha de pagamento e encargos', categoria: 'PESSOAL', valorMensal: 26500 },
+  // Pró-labore separado de propósito: lucro que só existe porque o dono não se
+  // paga não é lucro. Deixar isso de fora é o erro mais comum de padaria.
+  { id: 'co11', nome: 'Pró-labore', categoria: 'PESSOAL', valorMensal: 4500 },
+  { id: 'co2', nome: 'Aluguel do ponto', categoria: 'OCUPACAO', valorMensal: 6500 },
+  { id: 'co3', nome: 'Energia elétrica', categoria: 'UTILIDADES', valorMensal: 3850 },
+  { id: 'co4', nome: 'Gás (forno e cocção)', categoria: 'UTILIDADES', valorMensal: 1420 },
+  { id: 'co5', nome: 'Água e esgoto', categoria: 'UTILIDADES', valorMensal: 780 },
+  { id: 'co6', nome: 'Contabilidade', categoria: 'ADMINISTRATIVO', valorMensal: 950 },
+  { id: 'co7', nome: 'Internet, telefonia e sistema', categoria: 'ADMINISTRATIVO', valorMensal: 640 },
+  { id: 'co8', nome: 'Manutenção de equipamentos', categoria: 'MANUTENCAO', valorMensal: 900 },
+  { id: 'co9', nome: 'Limpeza e higienização', categoria: 'OCUPACAO', valorMensal: 520 },
+  { id: 'co10', nome: 'Marketing e material gráfico', categoria: 'ADMINISTRATIVO', valorMensal: 380 },
 ]

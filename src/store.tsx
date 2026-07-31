@@ -10,6 +10,7 @@ import type {
   Caixa,
   Cliente,
   Colaborador,
+  CustoOperacional,
   DeParaProduto,
   DocumentoFiscal,
   EventoAuditoria,
@@ -72,6 +73,7 @@ interface Estado {
   pedidosCozinha: PedidoCozinha[]
   eventosAuditoria: EventoAuditoria[]
   dePara: DeParaProduto[]
+  custosOperacionais: CustoOperacional[]
   usuario: string | null
   /** Estado simulado da SEFAZ, para demonstrar contingência. */
   sefazDisponivel: boolean
@@ -163,7 +165,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todasVendas: [...vendas, ...seed.historicoVendas],
       caixa, movimentosCaixa, pedidos, clientes, movimentosFidelidade,
       perdasBalcao, documentosFiscais, pedidosCozinha, eventosAuditoria,
-      dePara, usuario, sefazDisponivel,
+      dePara, custosOperacionais: seed.custosOperacionais, usuario, sefazDisponivel,
 
       entrar: (nome) => {
         setUsuario(nome)

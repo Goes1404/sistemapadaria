@@ -57,6 +57,8 @@ export interface Produto {
   codigoBarras?: string
   /** Código interno usado na etiqueta da balança (EAN-13 de peso variável). */
   codigoBalanca?: string
+  /** Produto de revenda: custo é o preço de compra, não uma ficha técnica. */
+  custoCompra?: number
   fiscal: DadosFiscais
 }
 
@@ -347,4 +349,23 @@ export interface NotaFornecedor {
 export interface DeParaProduto {
   codigoFornecedor: string
   insumoId: string
+}
+
+// ---------------------------------------------------------------------------
+// Custos operacionais
+// ---------------------------------------------------------------------------
+
+export type CategoriaCusto =
+  | 'PESSOAL'
+  | 'OCUPACAO'
+  | 'UTILIDADES'
+  | 'ADMINISTRATIVO'
+  | 'MANUTENCAO'
+
+/** Despesa fixa mensal — o que separa margem bruta de lucro líquido. */
+export interface CustoOperacional {
+  id: string
+  nome: string
+  categoria: CategoriaCusto
+  valorMensal: number
 }

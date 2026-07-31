@@ -39,6 +39,21 @@ export function custoDoProduto(
   lotes: Lote[],
   nomeInsumo: (id: string) => string,
 ): CustoProduto {
+  // Revenda: o custo é o preço de compra, não uma receita.
+  if (produto.custoCompra !== undefined) {
+    const margemBruta = produto.preco - produto.custoCompra
+    return {
+      produtoId: produto.id,
+      nome: produto.nome,
+      custoUnitario: produto.custoCompra,
+      precoVenda: produto.preco,
+      margemBruta,
+      margemPercentual: produto.preco > 0 ? (margemBruta / produto.preco) * 100 : 0,
+      composicao: [{ insumoId: '', nome: 'Custo de compra', custo: produto.custoCompra, participacao: 100 }],
+      temFicha: true,
+    }
+  }
+
   const ficha = fichas.find((f) => f.produtoId === produto.id)
 
   if (!ficha || ficha.rendimento <= 0) {

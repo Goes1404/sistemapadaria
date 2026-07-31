@@ -13,6 +13,7 @@ import Ponto from '@/pages/Ponto'
 import Kds from '@/pages/Kds'
 import Clientes from '@/pages/Clientes'
 import Bi from '@/pages/Bi'
+import Produtos from '@/pages/Produtos'
 import Auditoria from '@/pages/Auditoria'
 
 function Protegido({ children }: { children: JSX.Element }) {
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="rh" element={<RH />} />
             <Route path="clientes" element={<Clientes />} />
             <Route path="financeiro" element={<Financeiro />} />
+            <Route path="produtos" element={<Produtos />} />
             <Route path="bi" element={<Bi />} />
             <Route path="auditoria" element={<Auditoria />} />
           </Route>

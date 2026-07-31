@@ -29,7 +29,8 @@ sem ele, abrir `/pdv` direto ou recarregar a página daria 404.
 | `/app/whatsapp` | Painel de encomendas + simulação da conversa | Atendente |
 | `/app/rh` | Equipe, registros e inconsistências de ponto | Gerente |
 | `/app/clientes` | Base, clube do pão e campanhas | Gerente |
-| `/app/financeiro` | Fluxo de caixa do dia | Gerente |
+| `/app/financeiro` | DRE, ponto de equilíbrio, caixa e custos fixos | Gerente |
+| `/app/produtos` | Custo, lucro e sazonalidade de cada produto | Gerente |
 | `/app/bi` | Tendência, venda por horário, curva ABC | Gerente |
 | `/app/auditoria` | Quem fez o quê, quando e com que autorização | Gerente |
 | `/pdv` | Frente de caixa (tablet) | Operador — abre sem login |
@@ -111,8 +112,12 @@ O levantamento em [`docs/MELHORIAS.md`](docs/MELHORIAS.md) virou funcionalidade 
 - **Importação do XML da NF-e** — lê a nota do fornecedor de verdade (DOMParser), resolve produtos
   pelo de-para aprendido, e pede só lote e validade, que não vêm no XML.
 - **KDS** — fila da cozinha com cronômetro por pedido, acendendo aos 6 e aos 12 minutos.
-- **BI** — série histórica de 21 dias, venda por faixa de horário com os dois picos da padaria,
+- **BI** — série histórica de 120 dias, venda por faixa de horário com os dois picos da padaria,
   CMV, margem e curva ABC.
+- **DRE completa** — da receita bruta ao lucro líquido, passando por CMV, taxa de cartão, imposto,
+  perdas e custo fixo. Com ponto de equilíbrio diário e a leitura de para onde vai cada R$ 100.
+- **Lucro por produto** — custo unitário pela ficha técnica, margem de contribuição e lucro líquido
+  depois do rateio, mais a sazonalidade de cada item por hora, dia da semana e mês.
 
 ## Próxima etapa: da demo para a v1
 
