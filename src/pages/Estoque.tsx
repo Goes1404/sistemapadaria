@@ -8,20 +8,40 @@ import type {
   DeParaProduto, Farol, Insumo, Lote, MotivoPerda, NotaFornecedor, Produto, Unidade,
 } from '@/types'
 
-type Aba = 'lotes' | 'insumos' | 'movimentos' | 'perdas'
+type Aba = 'vitrine' | 'lotes' | 'insumos' | 'movimentos' | 'perdas'
+
+/**
+ * Cada aba tem seu próprio contexto e sua própria ação principal.
+ *
+ * Antes o cabeçalho mostrava os quatro botões o tempo todo, em qualquer aba:
+ * o usuário precisava ler todos para achar o que servia ali. Agora a aba
+ * escolhe o que aparece, e o botão âmbar é sempre a ação esperada naquele
+ * ponto do fluxo.
+ */
+const SUBTITULOS: Record<Aba, string> = {
+  vitrine: 'O que saiu do forno e está à venda, com a validade contada da fabricação.',
+  lotes: 'Cada lote de insumo é independente — saldos não se misturam.',
+  insumos: 'Saldo consolidado e ponto de reposição de cada insumo.',
+  movimentos: 'Todo movimento de entrada e saída, com origem rastreável.',
+  perdas: 'Quanto o desperdício custou, e de onde ele veio.',
+}
 
 export default function Estoque() {
   const {
     insumos, lotes, movimentosEstoque, cadastrarLote, cadastrarInsumo, descartarLote,
     produtos, perdasBalcao, registrarPerda, cadastrarLotes, dePara, registrarDePara,
+    lotesProduto, descartarLoteProduto, fichas, custoUnitario,
   } = useStore()
-  const [aba, setAba] = useState<Aba>('lotes')
+
+  const fichasDoProduto = (produtoId: string) => fichas.find((f) => f.produtoId === produtoId)
+  const [aba, setAba] = useState<Aba>('vitrine')
   const [filtro, setFiltro] = useState<Farol | 'TODOS'>('TODOS')
   const [janela, setJanela] = useState(JANELA_AMARELO)
   const [abrirLote, setAbrirLote] = useState(false)
   const [abrirInsumo, setAbrirInsumo] = useState(false)
   const [abrirPerda, setAbrirPerda] = useState(false)
   const [importando, setImportando] = useState(false)
+  const [etiqueta, setEtiqueta] = useState<string | null>(null)
 
   const nomeInsumo = (id: string) => insumos.find((i) => i.id === id)?.nome ?? '—'
   const unidade = (id: string) => insumos.find((i) => i.id === id)?.unidade ?? ''
@@ -46,17 +66,11 @@ export default function Estoque() {
     <>
       <PageHeader
         titulo="Estoque"
-        subtitulo="Cada lote é uma entidade independente — saldos não se misturam."
-        acao={
-          <div className="flex flex-wrap gap-2">
-            <button className="btn-ghost" onClick={() => setAbrirInsumo(true)}>Novo insumo</button>
-            <button className="btn-ghost" onClick={() => setAbrirPerda(true)}>Registrar perda</button>
-            <button className="btn-ghost" onClick={() => setImportando(true)}>Importar XML da NF-e</button>
-            <button className="btn-primary" onClick={() => setAbrirLote(true)}>Entrada de lote</button>
-          </div>
-        }
+        subtitulo={SUBTITULOS[aba]}
+        acao={<AcoesDaAba />}
       />
 
+      {aba === 'lotes' && (
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         {(['VERMELHO', 'AMARELO', 'VERDE'] as const).map((f) => {
           const rotulos = { VERMELHO: 'Vencidos / vencem hoje', AMARELO: `Vencem em até ${janela} dias`, VERDE: 'No prazo' }
@@ -76,13 +90,19 @@ export default function Estoque() {
           )
         })}
       </div>
+      )}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <nav className="flex gap-1 rounded-lg bg-mata-900/8 p-1">
-          {([['lotes', 'Lotes'], ['insumos', 'Insumos'], ['movimentos', 'Movimentações'], ['perdas', 'Perdas']] as const).map(([id, rotulo]) => (
+        <nav className="abas">
+          {([
+            ['vitrine', 'Na vitrine'],
+            ['lotes', 'Lotes de insumo'],
+            ['insumos', 'Insumos'],
+            ['movimentos', 'Movimentações'],
+            ['perdas', 'Perdas'],
+          ] as const).map(([id, rotulo]) => (
             <button key={id} onClick={() => setAba(id)}
-              className={`rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                aba === id ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+              className={aba === id ? 'aba-ativa' : 'aba-inativa'}>
               {rotulo}
             </button>
           ))}
@@ -181,7 +201,13 @@ export default function Estoque() {
         </Card>
       )}
 
+      {aba === 'vitrine' && <Vitrine />}
+
       {aba === 'perdas' && <Perdas />}
+
+      {etiqueta && (
+        <ModalEtiqueta loteId={etiqueta} onFechar={() => setEtiqueta(null)} />
+      )}
 
       {abrirLote && <ModalLote onFechar={() => setAbrirLote(false)} />}
       {abrirInsumo && <ModalInsumo onFechar={() => setAbrirInsumo(false)} />}
@@ -359,6 +385,191 @@ export default function Estoque() {
             </Tabela>
           )}
         </Card>
+      </div>
+    )
+  }
+
+  /**
+   * O que está na vitrine agora, com a validade contada da fabricação.
+   *
+   * É o outro lado do controle de lote: na entrada rastreamos o insumo do
+   * fornecedor; aqui rastreamos o que saiu do forno.
+   */
+  function Vitrine() {
+    const agora = Date.now()
+
+    const enriquecidos = lotesProduto
+      .filter((l) => l.status !== 'DESCARTADO')
+      .map((l) => {
+        const horas = (new Date(l.validoAte).getTime() - agora) / 3_600_000
+        const farol: Farol = horas <= 0 ? 'VERMELHO' : horas <= 24 ? 'AMARELO' : 'VERDE'
+        return { ...l, horas, farol }
+      })
+      .sort((a, b) => a.horas - b.horas)
+
+    const comSaldo = enriquecidos.filter((l) => l.quantidadeAtual > 0)
+    const vencidos = comSaldo.filter((l) => l.farol === 'VERMELHO')
+    const hoje = comSaldo.filter((l) => l.farol === 'AMARELO')
+
+    const valorEmRisco = vencidos.reduce(
+      (s, l) => s + l.quantidadeAtual * custoUnitario(l.produtoId), 0)
+
+    const nomeProduto = (id: string) => produtos.find((p) => p.id === id)?.nome ?? '—'
+
+    function prazo(horas: number): string {
+      if (horas <= 0) {
+        const h = Math.abs(Math.round(horas))
+        return h < 24 ? `venceu há ${h}h` : `venceu há ${Math.round(h / 24)}d`
+      }
+      if (horas < 24) return `vence em ${Math.round(horas)}h`
+      return `vence em ${Math.round(horas / 24)}d`
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Stat rotulo="Vencidos na vitrine" valor={String(vencidos.length)}
+                numero={vencidos.length} formatar={(n) => String(Math.round(n))}
+                detalhe={vencidos.length ? `${brl(valorEmRisco)} a descartar agora` : 'nada vencido'}
+                tom={vencidos.length ? 'erro' : 'ok'} />
+          <Stat rotulo="Vencem em 24h" valor={String(hoje.length)}
+                numero={hoje.length} formatar={(n) => String(Math.round(n))}
+                detalhe="promover ou usar hoje" tom={hoje.length ? 'alerta' : 'ok'} />
+          <Stat rotulo="Lotes na vitrine" valor={String(comSaldo.length)}
+                numero={comSaldo.length} formatar={(n) => String(Math.round(n))}
+                detalhe="produção rastreada" />
+        </div>
+
+        {vencidos.length > 0 && (
+          <div className="rounded-xl border-2 border-red-400/50 bg-red-500/10 px-5 py-4">
+            <p className="text-sm font-bold text-red-800">
+              {vencidos.length} lote{vencidos.length > 1 ? 's' : ''} vencido
+              {vencidos.length > 1 ? 's' : ''} ainda com saldo na vitrine
+            </p>
+            <p className="mt-1 text-sm text-mata-900/70">
+              Retire do balcão e clique em <strong>Descartar</strong>. A perda é lançada
+              automaticamente no relatório, com o custo calculado pela ficha técnica.
+            </p>
+          </div>
+        )}
+
+        <Card titulo="Produtos prontos, por validade">
+          {comSaldo.length === 0 ? (
+            <Vazio icone="◉"
+                   mensagem="Nada na vitrine. Registre uma fornada em Produção e o lote aparece aqui com a validade já calculada." />
+          ) : (
+            <Tabela cabecalho={['Produto', 'Lote', 'Saldo', 'Fabricado', 'Válido até', 'Situação', 'Ações']}>
+              {comSaldo.map((l) => (
+                <tr key={l.id}>
+                  <td className="td font-medium text-mata-800">{nomeProduto(l.produtoId)}</td>
+                  <td className="td font-mono text-xs text-mata-900/50">{l.codigo}</td>
+                  <td className="td tabular-nums">{num(l.quantidadeAtual, 1)}</td>
+                  <td className="td whitespace-nowrap text-xs text-mata-900/60">{dataHoraBR(l.fabricadoEm)}</td>
+                  <td className="td whitespace-nowrap tabular-nums">{dataHoraBR(l.validoAte)}</td>
+                  <td className="td"><BadgeFarol farol={l.farol} texto={prazo(l.horas)} /></td>
+                  <td className="td">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setEtiqueta(l.id)}
+                              className="rounded-lg border border-mata-900/15 bg-white px-2.5 py-1 text-xs font-semibold text-mata-800 transition-colors hover:bg-mata-900/5">
+                        Etiqueta
+                      </button>
+                      {l.farol === 'VERMELHO' && (
+                        <button onClick={() => descartarLoteProduto(l.id)}
+                                className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-red-500/20">
+                          Descartar
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </Tabela>
+          )}
+        </Card>
+      </div>
+    )
+  }
+
+  /** Etiqueta que vai no produto embalado. */
+  function ModalEtiqueta({ loteId, onFechar }: { loteId: string; onFechar: () => void }) {
+    const lote = lotesProduto.find((l) => l.id === loteId)
+    const produto = produtos.find((p) => p.id === lote?.produtoId)
+    if (!lote || !produto) return null
+
+    const ficha = fichasDoProduto(produto.id)
+
+    return (
+      <Modal titulo="Etiqueta de validade" onFechar={onFechar}>
+        <div className="rounded-xl border-2 border-dashed border-mata-900/25 bg-white p-5">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-mata-900/50">
+            Pães e Doces Bela Vista
+          </p>
+          <p className="mt-2 text-center text-lg font-extrabold text-mata-900">{produto.nome}</p>
+
+          <dl className="mt-4 space-y-1.5 border-t border-mata-900/10 pt-3 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-mata-900/55">Fabricação</dt>
+              <dd className="font-semibold tabular-nums">{dataHoraBR(lote.fabricadoEm)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-mata-900/55">Validade</dt>
+              <dd className="font-bold tabular-nums text-red-700">{dataHoraBR(lote.validoAte)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-mata-900/55">Lote</dt>
+              <dd className="font-mono text-xs">{lote.codigo}</dd>
+            </div>
+          </dl>
+
+          {ficha && (
+            <p className="mt-3 border-t border-mata-900/10 pt-3 text-[11px] leading-relaxed text-mata-900/60">
+              <strong className="text-mata-900">Ingredientes:</strong>{' '}
+              {ficha.itens.map((i) => nomeInsumo(i.insumoId)).join(', ')}.
+            </p>
+          )}
+          {produto.conservacao && (
+            <p className="mt-1.5 text-[11px] text-mata-900/60">
+              <strong className="text-mata-900">Conservação:</strong> {produto.conservacao}.
+            </p>
+          )}
+        </div>
+
+        <p className="mt-3 rounded-lg bg-mata-900/5 px-3 py-2 text-xs text-mata-900/55">
+          Na loja, isto sai na impressora térmica e vai colado no produto embalado. Além de
+          exigência sanitária, é o que permite rastrear o lote depois de vendido.
+        </p>
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button className="btn-ghost" onClick={onFechar}>Fechar</button>
+          <button className="btn-primary" onClick={onFechar}>Imprimir etiqueta</button>
+        </div>
+      </Modal>
+    )
+  }
+
+  /** Ação principal muda com a aba, para não obrigar o usuário a procurar. */
+  function AcoesDaAba() {
+    if (aba === 'vitrine') {
+      return (
+        <div className="flex flex-wrap gap-2">
+          <button className="btn-ghost" onClick={() => setAbrirPerda(true)}>Registrar perda</button>
+          <a className="btn-primary" href="/app/producao">Registrar fornada</a>
+        </div>
+      )
+    }
+    if (aba === 'insumos') {
+      return <button className="btn-primary" onClick={() => setAbrirInsumo(true)}>Novo insumo</button>
+    }
+    if (aba === 'perdas') {
+      return <button className="btn-primary" onClick={() => setAbrirPerda(true)}>Registrar perda</button>
+    }
+    if (aba === 'movimentos') {
+      return <button className="btn-ghost" onClick={() => setAba('lotes')}>Ver lotes</button>
+    }
+    return (
+      <div className="flex flex-wrap gap-2">
+        <button className="btn-ghost" onClick={() => setImportando(true)}>Importar XML da NF-e</button>
+        <button className="btn-primary" onClick={() => setAbrirLote(true)}>Entrada de lote</button>
       </div>
     )
   }

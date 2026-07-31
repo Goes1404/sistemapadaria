@@ -45,11 +45,23 @@
    *   2. ::before — brilho especular que segue o cursor (--bx / --by)
    *   3. ::after  — borda interna clara no topo, escura embaixo (espessura)
    */
+  /*
+   * O vidro precisa de borda visível.
+   *
+   * A primeira versão usava borda branca translúcida, que sumia sobre fundo
+   * claro: bonito parado, confuso em uso — o usuário não sabia onde um painel
+   * termina e o outro começa. Agora a borda é escura e sutil, e o brilho branco
+   * vira um realce interno no topo, via box-shadow.
+   */
   .vidro {
-    @apply relative isolate overflow-hidden rounded-2xl border border-white/65
-           bg-white/55 shadow-vidro transition-shadow duration-300;
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    @apply relative isolate overflow-hidden rounded-2xl border border-mata-900/[0.12]
+           bg-white/75 transition-all duration-200;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 2px rgba(22, 51, 31, 0.06),
+      0 8px 24px -12px rgba(22, 51, 31, 0.22);
   }
 
   .vidro::before {
@@ -74,7 +86,14 @@
     );
   }
 
-  .vidro-interativo:hover { @apply shadow-vidro-alto; }
+  .vidro-interativo { @apply cursor-pointer; }
+  .vidro-interativo:hover {
+    @apply border-bela-500/50;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 2px 4px rgba(22, 51, 31, 0.08),
+      0 14px 32px -14px rgba(22, 51, 31, 0.3);
+  }
   .vidro-interativo:hover::before { @apply opacity-100; }
 
   /* Vidro escuro, para os terminais de loja */
@@ -100,8 +119,8 @@
            hover:from-bela-300 hover:to-bela-500 hover:shadow-[0_8px_22px_-6px_rgba(217,134,15,0.65)];
   }
   .btn-ghost {
-    @apply btn border border-white/60 bg-white/50 text-mata-800 backdrop-blur-md
-           hover:bg-white/80;
+    @apply btn border border-mata-900/[0.18] bg-white text-mata-800 shadow-sm
+           hover:border-mata-900/30 hover:bg-mata-900/5;
   }
   .btn-escuro {
     @apply btn border border-mata-900/20 bg-gradient-to-b from-mata-700 to-mata-900
@@ -117,18 +136,44 @@
   }
 
   .input {
-    @apply w-full rounded-xl border border-white/60 bg-white/70 px-3.5 py-2.5 text-sm
-           text-mata-900 backdrop-blur-md transition-all outline-none
-           placeholder:text-mata-900/35
-           focus:border-bela-400 focus:bg-white/90 focus:ring-2 focus:ring-bela-500/25;
+    @apply w-full rounded-xl border border-mata-900/[0.18] bg-white px-3.5 py-2.5 text-sm
+           text-mata-900 transition-all outline-none
+           placeholder:text-mata-900/40
+           hover:border-mata-900/30
+           focus:border-bela-500 focus:ring-4 focus:ring-bela-500/20;
   }
   .label {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-mata-900/55;
   }
   .th {
-    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-mata-900/50;
+    @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-mata-900/55;
   }
-  .td { @apply px-4 py-3 text-sm; }
+  .td { @apply px-4 py-3.5 text-sm; }
+
+  /*
+   * Navegação em abas.
+   *
+   * Antes a aba selecionada era só um branco sobre cinza claro — dava para
+   * passar o olho e não perceber onde se está. Agora tem borda, sombra e
+   * contraste de peso.
+   */
+  .abas {
+    @apply inline-flex gap-1 rounded-xl border border-mata-900/[0.12] bg-mata-900/[0.06] p-1;
+  }
+  .aba {
+    @apply rounded-lg px-3.5 py-2 text-sm font-semibold transition-all;
+  }
+  .aba-ativa {
+    @apply aba border border-mata-900/10 bg-white text-mata-900 shadow-sm;
+  }
+  .aba-inativa {
+    @apply aba border border-transparent text-mata-900/55 hover:bg-white/60 hover:text-mata-900;
+  }
+
+  /** Linha de tabela que abre um detalhe. */
+  .linha-clicavel {
+    @apply cursor-pointer transition-colors hover:bg-bela-500/10;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

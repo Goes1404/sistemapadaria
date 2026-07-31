@@ -68,11 +68,10 @@ export default function Produtos() {
         titulo="Análise por produto"
         subtitulo="Quanto cada item custa, quanto sobra dele, e quando ele vende."
         acao={
-          <div className="flex gap-1 rounded-lg bg-mata-900/8 p-1">
+          <div className="abas">
             {PERIODOS.map((p) => (
               <button key={p.dias} onClick={() => setDias(p.dias)}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  dias === p.dias ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+                className={`${dias === p.dias ? 'aba-ativa' : 'aba-inativa'} px-3 py-1.5 text-xs`}>
                 {p.rotulo}
               </button>
             ))}
@@ -126,7 +125,7 @@ export default function Produtos() {
         {/* Lista */}
         <div className="lg:col-span-3">
           <Card
-            titulo="Resultado por produto"
+            titulo="Resultado por produto · clique para detalhar"
             acao={
               <select className="input w-auto py-1 text-xs" value={ordem}
                       onChange={(e) => setOrdem(e.target.value as Ordem)}>
@@ -141,7 +140,10 @@ export default function Produtos() {
               <Tabela cabecalho={['Produto', 'Vendidos', 'Receita', 'M. contribuição', 'Lucro líquido']}>
                 {ordenados.map((r) => (
                   <tr key={r.produtoId}
-                      className={`cursor-pointer ${detalhe?.produtoId === r.produtoId ? 'bg-bela-500/10' : ''}`}
+                      className={`linha-clicavel ${
+                        detalhe?.produtoId === r.produtoId
+                          ? 'bg-bela-500/15 shadow-[inset_3px_0_0_0_theme(colors.bela.500)]'
+                          : ''}`}
                       onClick={() => setSelecionado(r.produtoId)}>
                     <td className="td font-medium text-mata-800">
                       {r.nome}

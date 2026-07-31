@@ -59,7 +59,39 @@ export interface Produto {
   codigoBalanca?: string
   /** Produto de revenda: custo é o preço de compra, não uma ficha técnica. */
   custoCompra?: number
+  /**
+   * Dias de validade a partir da fabricação.
+   *
+   * É o que a etiqueta do produto embalado precisa declarar, e o que permite
+   * rastrear o produto PRONTO — o equivalente, na saída, do controle de lote
+   * que já existe na entrada dos insumos.
+   */
+  diasValidade?: number
+  /** Como conservar, texto que vai impresso na etiqueta. */
+  conservacao?: string
   fiscal: DadosFiscais
+}
+
+/**
+ * Lote de produto PRONTO, criado a cada fornada.
+ *
+ * Diferente do lote de insumo, que entra pela nota do fornecedor, este nasce
+ * da produção. Sem ele não há como responder "esse bolo na vitrine é de
+ * quando?" nem imprimir etiqueta de validade.
+ */
+export interface LoteProduto {
+  id: string
+  produtoId: string
+  /** Código legível, impresso na etiqueta. */
+  codigo: string
+  quantidadeInicial: number
+  quantidadeAtual: number
+  fabricadoEm: string
+  validoAte: string
+  /** Fornada que originou o lote, quando veio da produção. */
+  fornadaId?: string
+  responsavel: string
+  status: 'ATIVO' | 'ESGOTADO' | 'DESCARTADO'
 }
 
 export interface FichaTecnicaItem {

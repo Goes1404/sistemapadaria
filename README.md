@@ -24,7 +24,7 @@ sem ele, abrir `/pdv` direto ou recarregar a página daria 404.
 |---|---|---|
 | `/` | Login | Gerente — qualquer e-mail/senha entra |
 | `/app` | Dashboard de alertas | Gerente |
-| `/app/estoque` | Farol de validade, lotes, insumos, movimentações, perdas | Estoquista / gerente |
+| `/app/estoque` | Vitrine (validade do produto pronto), lotes, insumos, movimentações, perdas | Estoquista / gerente |
 | `/app/producao` | Ficha técnica, registro de fornada, pauta do dia | Padeiro |
 | `/app/whatsapp` | Painel de encomendas + simulação da conversa | Atendente |
 | `/app/rh` | Equipe, registros e inconsistências de ponto | Gerente |
@@ -109,6 +109,10 @@ O levantamento em [`docs/MELHORIAS.md`](docs/MELHORIAS.md) virou funcionalidade 
   trabalhador, ajuste que não sobrescreve o original, verificação de integridade e exportação do AFD.
 - **Perdas de balcão** — a sobra do fim do dia, que é a perda que mais dói e não aparecia no
   relatório de vencimento.
+- **Validade do produto pronto** — cada fornada gera um lote com fabricação e validade calculadas
+  a partir dos dias de validade do produto. Farol por hora na aba *Na vitrine*, etiqueta pronta
+  para a impressora térmica (com ingredientes e conservação), e descarte que já lança a perda com
+  o custo da ficha técnica.
 - **Importação do XML da NF-e** — lê a nota do fornecedor de verdade (DOMParser), resolve produtos
   pelo de-para aprendido, e pede só lote e validade, que não vêm no XML.
 - **KDS** — fila da cozinha com cronômetro por pedido, acendendo aos 6 e aos 12 minutos.

@@ -63,11 +63,10 @@ export default function Bi() {
         titulo="Inteligência do negócio"
         subtitulo="O painel do dia mostra o agora. Aqui está a tendência."
         acao={
-          <div className="flex gap-1 rounded-lg bg-mata-900/8 p-1">
+          <div className="abas">
             {PERIODOS.map((p) => (
               <button key={p.dias} onClick={() => setDias(p.dias)}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  dias === p.dias ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+                className={`${dias === p.dias ? 'aba-ativa' : 'aba-inativa'} px-3 py-1.5 text-xs`}>
                 {p.rotulo}
               </button>
             ))}

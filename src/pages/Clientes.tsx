@@ -68,11 +68,10 @@ export default function Clientes() {
               detalhe="passivo de fidelidade" tom="alerta" />
       </div>
 
-      <nav className="mb-4 flex gap-1 rounded-lg bg-mata-900/8 p-1">
+      <nav className="abas mb-4">
         {([['clientes', 'Base'], ['clube', 'Clube do pão'], ['campanhas', 'Campanhas']] as const).map(([id, rotulo]) => (
           <button key={id} onClick={() => setAba(id)}
-            className={`rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-              aba === id ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+            className={aba === id ? 'aba-ativa' : 'aba-inativa'}>
             {rotulo}
           </button>
         ))}

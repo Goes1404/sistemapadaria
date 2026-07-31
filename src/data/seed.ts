@@ -19,6 +19,7 @@ import type {
   DeParaProduto,
   EventoAuditoria,
   CustoOperacional,
+  LoteProduto,
 } from '@/types'
 
 /** Data-base fixa da demo, para o farol de validade ser sempre previsível. */
@@ -88,31 +89,44 @@ export const lotes: Lote[] = [
 
 export const produtos: Produto[] = [
   { id: 'p1', nome: 'Pão Francês (kg)', preco: 18.9, porPeso: true, codigoBarras: '7891000001', codigoBalanca: '100001',
+    diasValidade: 1, conservacao: 'Manter em local seco e arejado',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p2', nome: 'Pão de Queijo (un)', preco: 3.5, porPeso: false, codigoBarras: '7891000002',
+    diasValidade: 2, conservacao: 'Consumir no dia ou refrigerar',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p3', nome: 'Bolo de Cenoura (fatia)', preco: 8.0, porPeso: false, codigoBarras: '7891000003',
+    diasValidade: 4, conservacao: 'Refrigerar após 24h',
     fiscal: { ncm: '19052000', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p4', nome: 'Sonho de Creme', preco: 6.5, porPeso: false, codigoBarras: '7891000004',
+    diasValidade: 2, conservacao: 'Manter refrigerado',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p5', nome: 'Presunto Fatiado (kg)', preco: 54.9, porPeso: true, codigoBarras: '7891000005', codigoBalanca: '100005',
+    diasValidade: 5, conservacao: 'Manter refrigerado entre 0 °C e 4 °C',
     fiscal: { ncm: '16024900', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p6', nome: 'Café Expresso', preco: 5.0, porPeso: false, codigoBarras: '7891000006',
+    diasValidade: 0, conservacao: 'Consumo imediato',
     fiscal: { ncm: '21011100', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p7', nome: 'Misto Quente', preco: 12.0, porPeso: false, codigoBarras: '7891000007',
+    diasValidade: 0, conservacao: 'Consumo imediato',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p8', nome: 'Suco de Laranja 300ml', preco: 9.5, porPeso: false, codigoBarras: '7891000008',
+    diasValidade: 1, conservacao: 'Manter refrigerado',
     fiscal: { ncm: '20091100', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p9', nome: 'Baguete Artesanal', preco: 14.0, porPeso: false, codigoBarras: '7891000009',
+    diasValidade: 2, conservacao: 'Manter em local seco e arejado',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p10', nome: 'Croissant', preco: 9.0, porPeso: false, codigoBarras: '7891000010',
+    diasValidade: 3, conservacao: 'Manter em local seco e arejado',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p11', nome: 'Torta Salgada (fatia)', preco: 11.5, porPeso: false, codigoBarras: '7891000011',
+    diasValidade: 3, conservacao: 'Manter refrigerado',
     fiscal: { ncm: '19059090', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p12', nome: 'Água Mineral 500ml', preco: 4.0, porPeso: false, codigoBarras: '7891000012',
     custoCompra: 1.35, // revenda: não tem ficha, o custo é o preço de compra
+    diasValidade: 365, conservacao: 'Local seco, ao abrigo da luz',
     fiscal: { ncm: '22011000', cfop: '5102', origem: '0', csosn: '102' } },
   { id: 'p13', nome: 'Mortadela Fatiada (kg)', preco: 39.9, porPeso: true, codigoBarras: '7891000013', codigoBalanca: '100013',
+    diasValidade: 5, conservacao: 'Manter refrigerado entre 0 °C e 4 °C',
     fiscal: { ncm: '16024900', cfop: '5102', origem: '0', csosn: '102' } },
 ]
 
@@ -598,4 +612,40 @@ export const custosOperacionais: CustoOperacional[] = [
   { id: 'co8', nome: 'Manutenção de equipamentos', categoria: 'MANUTENCAO', valorMensal: 900 },
   { id: 'co9', nome: 'Limpeza e higienização', categoria: 'OCUPACAO', valorMensal: 520 },
   { id: 'co10', nome: 'Marketing e material gráfico', categoria: 'ADMINISTRATIVO', valorMensal: 380 },
+]
+
+// ---------------------------------------------------------------------------
+// Lotes de produto pronto
+// ---------------------------------------------------------------------------
+
+function emDiasHora(dias: number, hora: number): string {
+  const d = new Date(hoje)
+  d.setDate(d.getDate() + dias)
+  d.setHours(hora, 0, 0, 0)
+  return d.toISOString()
+}
+
+/**
+ * O que já saiu do forno e está na vitrine.
+ *
+ * Escalonado de propósito para a demonstração ter os três estados do farol:
+ * um lote vencido, um vencendo hoje e vários no prazo.
+ */
+export const lotesProduto: LoteProduto[] = [
+  { id: 'lp1', produtoId: 'p1', codigo: 'PF-0731A', quantidadeInicial: 42, quantidadeAtual: 8.5,
+    fabricadoEm: emDiasHora(-1, 5), validoAte: emDiasHora(0, 5), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp2', produtoId: 'p1', codigo: 'PF-0731B', quantidadeInicial: 51, quantidadeAtual: 34,
+    fabricadoEm: emDiasHora(0, 5), validoAte: emDiasHora(1, 5), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp3', produtoId: 'p3', codigo: 'BC-0730', quantidadeInicial: 24, quantidadeAtual: 7,
+    fabricadoEm: emDiasHora(-4, 7), validoAte: emDiasHora(0, 7), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp4', produtoId: 'p10', codigo: 'CR-0730', quantidadeInicial: 40, quantidadeAtual: 12,
+    fabricadoEm: emDiasHora(-3, 6), validoAte: emDiasHora(-1, 6), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp5', produtoId: 'p2', codigo: 'PQ-0731', quantidadeInicial: 100, quantidadeAtual: 63,
+    fabricadoEm: emDiasHora(0, 6), validoAte: emDiasHora(2, 6), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp6', produtoId: 'p9', codigo: 'BG-0731', quantidadeInicial: 25, quantidadeAtual: 18,
+    fabricadoEm: emDiasHora(0, 5), validoAte: emDiasHora(2, 5), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp7', produtoId: 'p11', codigo: 'TS-0730', quantidadeInicial: 20, quantidadeAtual: 6,
+    fabricadoEm: emDiasHora(-2, 9), validoAte: emDiasHora(1, 9), responsavel: 'Marcos Vieira', status: 'ATIVO' },
+  { id: 'lp8', produtoId: 'p4', codigo: 'SN-0731', quantidadeInicial: 30, quantidadeAtual: 22,
+    fabricadoEm: emDiasHora(0, 7), validoAte: emDiasHora(2, 7), responsavel: 'Marcos Vieira', status: 'ATIVO' },
 ]

@@ -25,11 +25,10 @@ export default function Whatsapp() {
         subtitulo="Os pedidos caem aqui. Ninguém precisa ficar com o celular na mão."
       />
 
-      <nav className="mb-5 flex gap-1 rounded-lg bg-mata-900/8 p-1">
+      <nav className="abas mb-5">
         {([['painel', 'Painel de pedidos'], ['conversa', 'Como o cliente vê']] as const).map(([id, rotulo]) => (
           <button key={id} onClick={() => setAba(id)}
-            className={`rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-              aba === id ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+            className={aba === id ? 'aba-ativa' : 'aba-inativa'}>
             {rotulo}
           </button>
         ))}

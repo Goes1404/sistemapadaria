@@ -18,6 +18,7 @@ import type {
   Fornada,
   Insumo,
   Lote,
+  LoteProduto,
   MotivoPerda,
   MovimentoCaixa,
   MovimentoEstoque,
@@ -73,6 +74,7 @@ interface Estado {
   pedidosCozinha: PedidoCozinha[]
   eventosAuditoria: EventoAuditoria[]
   dePara: DeParaProduto[]
+  lotesProduto: LoteProduto[]
   custosOperacionais: CustoOperacional[]
   usuario: string | null
   /** Estado simulado da SEFAZ, para demonstrar contingência. */
@@ -87,6 +89,7 @@ interface Estado {
   cadastrarLotes: (lotes: Omit<Lote, 'id' | 'status' | 'quantidadeAtual'>[], referencia: string) => void
   descartarLote: (loteId: string) => void
   registrarDePara: (mapa: DeParaProduto) => void
+  descartarLoteProduto: (loteId: string) => void
 
   registrarFornada: (fichaId: string, quantidade: number, responsavel: string) => ResultadoFornada
   cadastrarFicha: (dados: Omit<FichaTecnica, 'id'>) => void
@@ -141,6 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [pedidosCozinha, setPedidosCozinha] = useState<PedidoCozinha[]>(seed.pedidosCozinha)
   const [eventosAuditoria, setEventos] = useState<EventoAuditoria[]>(seed.eventosAuditoria)
   const [dePara, setDePara] = useState<DeParaProduto[]>(seed.deParaInicial)
+  const [lotesProduto, setLotesProduto] = useState<LoteProduto[]>(seed.lotesProduto)
   const [usuario, setUsuario] = useState<string | null>(null)
   const [sefazDisponivel, setSefaz] = useState(true)
   const [proximoNumeroNfce, setProximoNumero] = useState(4712)
@@ -165,7 +169,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       todasVendas: [...vendas, ...seed.historicoVendas],
       caixa, movimentosCaixa, pedidos, clientes, movimentosFidelidade,
       perdasBalcao, documentosFiscais, pedidosCozinha, eventosAuditoria,
-      dePara, custosOperacionais: seed.custosOperacionais, usuario, sefazDisponivel,
+      dePara, lotesProduto, custosOperacionais: seed.custosOperacionais, usuario, sefazDisponivel,
 
       entrar: (nome) => {
         setUsuario(nome)
@@ -212,6 +216,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       registrarDePara: (mapa) =>
         setDePara((atual) => [...atual.filter((d) => d.codigoFornecedor !== mapa.codigoFornecedor), mapa]),
+
+      /** Descarte de produto pronto vencido — vira perda de balcão automaticamente. */
+      descartarLoteProduto: (loteId) => {
+        const lote = lotesProduto.find((l) => l.id === loteId)
+        if (!lote || lote.quantidadeAtual <= 0) return
+        const produto = produtos.find((p) => p.id === lote.produtoId)
+
+        setLotesProduto((atual) =>
+          atual.map((l) => (l.id === loteId ? { ...l, quantidadeAtual: 0, status: 'DESCARTADO' as const } : l)))
+
+        setPerdas((atual) => [
+          {
+            id: uid(), produtoId: lote.produtoId, quantidade: lote.quantidadeAtual,
+            motivo: 'SOBRA_FIM_DIA',
+            custoEstimado: lote.quantidadeAtual * custoUnitario(lote.produtoId),
+            registradoPor: usuario ?? 'Sistema',
+            registradoEm: new Date().toISOString(),
+            observacao: `Descarte do lote ${lote.codigo} — vencido`,
+          },
+          ...atual,
+        ])
+
+        registrarEvento({
+          ator: usuario ?? 'Sistema', acao: 'PERDA_REGISTRADA', entidade: 'LoteProduto',
+          detalhe: `${lote.quantidadeAtual} de ${produto?.nome ?? '—'} descartados — lote ${lote.codigo} vencido`,
+          terminal: 'BACKOFFICE',
+        })
+      },
 
       descartarLote: (loteId) => {
         const lote = lotes.find((l) => l.id === loteId)
@@ -267,10 +299,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        const agora = new Date()
         const fornada: Fornada = {
           id: uid(), fichaTecnicaId: fichaId, quantidadeProduzida: quantidade,
-          responsavel, produzidaEm: new Date().toISOString(), consumos,
+          responsavel, produzidaEm: agora.toISOString(), consumos,
         }
+
+        // Toda fornada gera um lote de produto PRONTO, com validade contada a
+        // partir de agora. É o que permite rastrear o que está na vitrine.
+        const produto = produtos.find((p) => p.id === ficha.produtoId)
+        if (produto) {
+          const validade = new Date(agora)
+          validade.setDate(validade.getDate() + (produto.diasValidade ?? 1))
+          const sigla = produto.nome.replace(/[^A-Za-zÀ-ú]/g, '').slice(0, 2).toUpperCase()
+          const dia = `${String(agora.getDate()).padStart(2, '0')}${String(agora.getMonth() + 1).padStart(2, '0')}`
+          setLotesProduto((atual) => [
+            {
+              id: uid(), produtoId: produto.id, codigo: `${sigla}-${dia}${atual.length + 1}`,
+              quantidadeInicial: quantidade, quantidadeAtual: quantidade,
+              fabricadoEm: agora.toISOString(), validoAte: validade.toISOString(),
+              fornadaId: fornada.id, responsavel, status: 'ATIVO',
+            },
+            ...atual,
+          ])
+        }
+
         setLotes(trabalho)
         setFornadas((atual) => [fornada, ...atual])
         setMovEstoque((atual) => [
@@ -512,7 +565,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [insumos, lotes, movimentosEstoque, produtos, fichas, fornadas, colaboradores,
       registrosPonto, ajustesPonto, vendas, caixa, movimentosCaixa, pedidos, clientes,
       movimentosFidelidade, perdasBalcao, documentosFiscais, pedidosCozinha,
-      eventosAuditoria, dePara, usuario, sefazDisponivel, proximoNumeroNfce, proximaSenha])
+      eventosAuditoria, dePara, lotesProduto, usuario, sefazDisponivel, proximoNumeroNfce, proximaSenha])
 
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>
 }

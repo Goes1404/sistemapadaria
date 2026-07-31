@@ -78,11 +78,10 @@ export default function Financeiro() {
         titulo="Financeiro"
         subtitulo="Do faturamento ao que realmente sobra no fim do mês."
         acao={
-          <div className="flex gap-1 rounded-lg bg-mata-900/8 p-1">
+          <div className="abas">
             {PERIODOS.map((p) => (
               <button key={p.dias} onClick={() => setDias(p.dias)}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  dias === p.dias ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+                className={`${dias === p.dias ? 'aba-ativa' : 'aba-inativa'} px-3 py-1.5 text-xs`}>
                 {p.rotulo}
               </button>
             ))}
@@ -104,11 +103,10 @@ export default function Financeiro() {
               detalhe={`${brl(fixoMensal / 30)} por dia, chova ou faça sol`} tom="alerta" />
       </div>
 
-      <nav className="mb-4 mt-6 flex flex-wrap gap-1 rounded-lg bg-mata-900/8 p-1">
+      <nav className="abas mb-4 mt-6 flex-wrap">
         {([['resultado', 'Resultado (DRE)'], ['caixa', 'Caixa do dia'], ['custos', 'Custos fixos']] as const).map(([id, rotulo]) => (
           <button key={id} onClick={() => setAba(id)}
-            className={`rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-              aba === id ? 'bg-white text-mata-900 shadow-sm' : 'text-mata-900/60 hover:text-mata-900'}`}>
+            className={aba === id ? 'aba-ativa' : 'aba-inativa'}>
             {rotulo}
           </button>
         ))}
